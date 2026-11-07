@@ -6,8 +6,8 @@ const stats = [
 
 function StatsStrip() {
   return (
-    <section className="bg-surface-subtle px-gutter-mobile py-md">
-      <div className="grid grid-cols-3 gap-xs">
+    <section className="bg-surface-subtle py-md">
+      <div className="mx-auto grid w-full max-w-page grid-cols-3 gap-xs px-gutter-mobile md:gap-md md:px-gutter">
         {stats.map((stat) => (
           <div
             key={stat.label}

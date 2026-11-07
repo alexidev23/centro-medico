@@ -88,6 +88,24 @@ specialties section in the next stage.
 - Label `text-label-sm text-fg-secondary`, tight leading: "Años de trayectoria",
   "Médicos especialistas", "Pacientes cuidados".
 
+## Desktop grid (E4b)
+
+`DESIGN.md` (Layout & Spacing) defines a fixed-max-width 12-column grid capped at
+`1280px` on desktop, 8 columns on tablets and 4 on mobile. The Stitch export for the
+landing is mobile only (no responsive prefixes, 127x1600 reference), so the desktop
+composition is derived from that grid.
+
+- `--container-page: 1280px` in `@theme`, consumed as `max-w-page`. The constant lives in
+  `globals.css`, like every other token.
+- Every shell surface caps its content with `mx-auto w-full max-w-page` and uses
+  `px-gutter-mobile` below `md` and `px-gutter` from `md` up.
+- Hero becomes `md:grid md:grid-cols-12`: copy and CTAs span 7 columns, next-slot card and
+  photo span 5. H1 steps up to `text-headline-lg` (36/44).
+- The fixed mobile CTA bar is hidden from `md` up; the header already exposes WhatsApp,
+  phone and portal there.
+- Footer and stats keep a full-bleed background with a constrained inner container, so the
+  tint reaches the viewport edges while the content stays on the grid.
+
 ## Acceptance criteria
 
 - `pnpm lint` exit 0.

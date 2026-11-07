@@ -16,13 +16,13 @@ const FACILITIES_IMAGE =
 
 function Hero() {
   return (
-    <section className="flex flex-col gap-lg px-gutter-mobile pt-md pb-lg">
-      <div className="flex flex-col gap-sm">
+    <section className="mx-auto flex w-full max-w-page flex-col gap-lg px-gutter-mobile pt-md pb-lg md:grid md:grid-cols-12 md:gap-x-xl md:gap-y-lg md:px-gutter md:pt-xl md:pb-xl">
+      <div className="flex flex-col gap-sm md:col-span-7 md:row-start-1 md:justify-center">
         <Badge variant="brand" className="self-start">
           <ShieldCheck className="size-4" />
           Centro Médico en Nueva Córdoba
         </Badge>
-        <h1 className="text-headline-lg-mobile tracking-tight text-foreground">
+        <h1 className="text-headline-lg-mobile tracking-tight text-foreground md:text-headline-lg">
           Atención médica humana, cercana y sin esperas innecesarias
         </h1>
         <p className="text-body-md text-fg-secondary">
@@ -31,24 +31,24 @@ function Hero() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-sm">
+      <div className="flex flex-col gap-sm md:col-span-7 md:row-start-2 md:flex-row">
         <Link
           href="#especialidades-section"
-          className={cn(buttonVariants({ variant: "primary" }), "w-full")}
+          className={cn(buttonVariants({ variant: "primary" }), "w-full md:w-auto")}
         >
           <CalendarDays className="size-5" />
           Sacar turno online
         </Link>
         <Link
           href="#especialidades-section"
-          className={cn(buttonVariants({ variant: "secondary" }), "w-full")}
+          className={cn(buttonVariants({ variant: "secondary" }), "w-full md:w-auto")}
         >
           <Stethoscope className="size-5" />
           Ver especialidades
         </Link>
       </div>
 
-      <article className="flex flex-col gap-sm rounded-lg bg-card p-md shadow-card">
+      <article className="flex flex-col gap-sm rounded-lg bg-card p-md shadow-card md:col-span-5 md:row-start-1">
         <div className="flex items-center justify-between gap-sm">
           <Badge variant="confirmed">
             <BadgeDot className="animate-pulse" />
@@ -83,12 +83,12 @@ function Hero() {
         </button>
       </article>
 
-      <div className="relative h-56 w-full overflow-hidden rounded-lg">
+      <div className="relative h-56 w-full overflow-hidden rounded-lg md:col-span-5 md:row-start-2 md:h-64">
         <Image
           src={FACILITIES_IMAGE}
           alt="Instalaciones del Centro Médico Aurora en Nueva Córdoba"
           fill
-          sizes="100vw"
+          sizes="(min-width: 768px) 42vw, 100vw"
           className="object-cover"
         />
         <div className="absolute inset-0 flex items-end bg-linear-to-t from-foreground/60 via-transparent to-transparent p-md">

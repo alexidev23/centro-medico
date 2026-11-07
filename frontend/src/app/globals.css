@@ -142,6 +142,9 @@
   --text-label-sm--line-height: 16px;
   --text-label-sm--font-weight: 600;
 
+  /* Layout */
+  --container-page: 1280px;
+
   /* Spacing scale */
   --spacing-gutter: 1.5rem;
   --spacing-gutter-mobile: 1rem;

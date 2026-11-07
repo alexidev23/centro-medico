@@ -22,25 +22,27 @@ const blocks = [
 
 function SiteFooter() {
   return (
-    <footer className="mt-xl flex w-full flex-col gap-md bg-surface-subtle px-gutter-mobile pt-lg pb-28">
-      {blocks.map((block) => (
-        <div key={block.title} className="flex flex-col gap-xs">
-          <div className="flex items-center gap-xs text-primary">
-            <block.icon className="size-5" />
-            <span className="text-label-md font-semibold text-foreground">
-              {block.title}
-            </span>
+    <footer className="mt-xl w-full bg-surface-subtle pt-lg pb-28 md:pb-lg">
+      <div className="mx-auto flex w-full max-w-page flex-col gap-md px-gutter-mobile md:px-gutter">
+        {blocks.map((block) => (
+          <div key={block.title} className="flex flex-col gap-xs">
+            <div className="flex items-center gap-xs text-primary">
+              <block.icon className="size-5" />
+              <span className="text-label-md font-semibold text-foreground">
+                {block.title}
+              </span>
+            </div>
+            {block.lines.map((line) => (
+              <p key={line} className="text-body-sm text-fg-secondary">
+                {line}
+              </p>
+            ))}
           </div>
-          {block.lines.map((line) => (
-            <p key={line} className="text-body-sm text-fg-secondary">
-              {line}
-            </p>
-          ))}
-        </div>
-      ))}
-      <p className="mt-xs pt-sm text-center text-label-sm italic text-muted-foreground">
-        Proyecto demo. Datos ficticios.
-      </p>
+        ))}
+        <p className="mt-xs pt-sm text-center text-label-sm italic text-muted-foreground">
+          Proyecto demo. Datos ficticios.
+        </p>
+      </div>
     </footer>
   )
 }

@@ -15,7 +15,7 @@ function SiteHeader() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
-        <div className="flex h-16 items-center justify-between gap-sm px-gutter-mobile">
+        <div className="mx-auto flex h-16 w-full max-w-page items-center justify-between gap-sm px-gutter-mobile md:px-gutter">
           <div className="flex min-w-0 items-center gap-sm">
             <button
               type="button"
