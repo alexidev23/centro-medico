@@ -9,6 +9,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
+        brand:
+          "bg-primary-light text-primary-dark [--badge-dot:var(--primary)]",
         confirmed:
           "bg-status-confirmed-bg text-status-confirmed-text [--badge-dot:var(--status-confirmed)]",
         pending:
