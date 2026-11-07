@@ -77,10 +77,11 @@ portal button use the demo contact data. The portal has no route yet.
 phone/WhatsApp, plus `Proyecto demo. Datos ficticios.`
 
 **Mobile CTA bar** — `fixed` bottom, full width, 1px top border, `--shadow-raised`,
-single primary "Sacar turno" action with a `CalendarDays` icon, 44px tall.
+single primary "Sacar turno" action with a `CalendarDays` icon, 48px tall.
 
-**Public layout** — `min-h-full` column, header, `pt-16` content area (64px header),
-`pb-28` on mobile (CTA bar clearance).
+**Public layout** — `min-h-full` column: header, `pt-16` content area (64px header),
+footer and CTA bar. The footer carries `pb-28` so the fixed CTA bar never covers its
+last line and no background seam appears above it.
 
 ## Acceptance criteria
 
