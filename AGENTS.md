@@ -34,6 +34,9 @@ Monorepo for "Centro Médico Aurora": a public booking site and a secretary pane
 ### Scope limit
 
 - A stage must not exceed 150-200 changed lines of code, under any circumstance.
+- Files generated verbatim by the shadcn/ui CLI do not count toward that limit: only
+  hand-authored changes do. Generated files are still reviewed, but they are not a
+  reason to split a stage.
 - The goal is reviewability: the user must be able to review the whole stage in one sitting, without facing a dozen or more files at once.
 - If a stage needs more, split it into smaller stages and plan each one separately.
 - Never exceed the limit to "finish faster". Report the split instead.
