@@ -1,4 +1,5 @@
 import { BookingSteps } from "@/components/landing/booking-steps"
+import { Contact } from "@/components/landing/contact"
 import { Faq } from "@/components/landing/faq"
 import { Hero } from "@/components/landing/hero"
 import { Professionals } from "@/components/landing/professionals"
@@ -14,6 +15,7 @@ export default function Home() {
       <BookingSteps />
       <Professionals />
       <Faq />
+      <Contact />
     </main>
   )
 }

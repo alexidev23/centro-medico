@@ -11,8 +11,8 @@ const navigation = [
   { label: "Especialidades", href: "#especialidades", icon: Stethoscope },
   { label: "Profesionales", href: "#profesionales", icon: Users },
   { label: "Cómo funciona", href: "#como-funciona", icon: CircleHelp },
-  { label: "Ubicación", href: "#", icon: MapPin },
-  { label: "Contacto", href: "#", icon: Headset },
+  { label: "Ubicación", href: "#contacto", icon: MapPin },
+  { label: "Contacto", href: "#contacto", icon: Headset },
 ]
 
 function SiteDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {

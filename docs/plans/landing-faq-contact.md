@@ -1,7 +1,7 @@
 # Stage 8 - Landing FAQ and contact
 
-**Branch:** `feat/landing-faq-contact`
-**Status:** E8a implemented, pending review. E8b deferred to its own stage.
+**Branch:** `feat/landing-faq-contact` (E8a, merged) and `feat/landing-contact` (E8b)
+**Status:** E8a merged in `6c0a9ee`; E8b implemented, pending review.
 **Depends on:** `main` at `82496f2`
 **Origin:** desktop-fidelity audit of the landing. Sections 6 and 7 of
 `landing_escritorio_centro_m_dico_aurora/code.html` were never built, and the header's
@@ -66,17 +66,43 @@ justify-between gap-sm p-md text-left text-title-md hover:text-primary` with an
 text-body-sm md:text-body-md`. Four questions copied verbatim from the export, with the
 WhatsApp number updated.
 
-**E8b (deferred)** - `<section id="contacto" ...>` with a `lg:grid-cols-12` split: details
-(kicker "Ubicación estratégica", `h2` "Vení a visitarnos", lead, address and hours rows with
-icon tiles, WhatsApp CTA) and the location map with the floating address card.
+**E8b** - `<section id="contacto" class="w-full scroll-mt-20 py-lg md:scroll-mt-24 md:py-xl">`;
+grid `grid-cols-1 items-center gap-xl lg:grid-cols-12`.
+
+- Left (`lg:col-span-6`): kicker "Ubicación estratégica", `h2` "Vení a visitarnos", lead; two
+  rows with a `size-10 rounded-xl bg-surface-subtle` icon tile (MapPin, Clock) and title/body
+  lines; WhatsApp CTA `h-14 px-xl` linking to `wa.me/5493515228900`.
+- Right (`lg:col-span-6`): `relative h-80 lg:h-96 overflow-hidden rounded-xl` with the
+  export's location image, a `bg-foreground/10` veil and the floating card (`inset-x-md
+  bottom-md rounded-xl bg-card/95 p-md backdrop-blur-sm`) with the address and the "Marcador
+  oficial" pill.
+
+Both sections are already built and verified together; only the split changed.
+
+## E8b scope
+
+| File | Change | ~Lines |
+| --- | --- | --- |
+| `frontend/src/components/landing/contact.tsx` | New location section | ~109 |
+| `frontend/src/app/(public)/page.tsx` | Render the section | ~2 |
+| `frontend/src/components/layout/site-drawer.tsx` | Ubicación and Contacto hrefs | ~4 |
 
 ## Acceptance criteria
 
-E8a:
+E8a (merged):
 
 - `pnpm lint` exit 0 and `pnpm build` exit 0.
 - 390px and 768px: the accordion stacks and opens/closes, no horizontal overflow.
 - 1024px and 1280px: the FAQ keeps its 48rem column and no horizontal overflow.
-- Drawer entries scroll to existing sections; `/` header "Contacto" still points to the
-  anchor added in E8b.
+- Drawer entries scroll to existing sections.
 - `git grep -nE '#[0-9a-fA-F]{6}' -- frontend/src` still matches only `globals.css`.
+
+E8b:
+
+- `pnpm lint` exit 0 and `pnpm build` exit 0.
+- 390px and 768px: the section stacks, the map is 20rem tall with its card fully inside it,
+  the WhatsApp button keeps 3.5rem height, no horizontal overflow.
+- 1024px and 1280px: details and map render side by side, map 24rem tall, no horizontal
+  overflow.
+- Header "Contacto" and drawer "Ubicación"/"Contacto" land on the section with the fixed
+  header offset.
