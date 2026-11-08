@@ -9,7 +9,7 @@ import { SiteDrawer } from "@/components/layout/site-drawer"
 import { buttonVariants } from "@/components/ui/button"
 
 const ICON_LINK =
-  "flex size-11 items-center justify-center rounded-full text-primary transition-colors hover:bg-surface-subtle"
+  "size-11 items-center justify-center rounded-full text-primary transition-colors hover:bg-surface-subtle"
 
 const NAV_ITEMS = [
   { label: "Inicio", href: "/", active: true },
@@ -32,31 +32,32 @@ function SiteHeader() {
               aria-expanded={open}
               aria-controls="site-drawer"
               onClick={() => setOpen(true)}
-              className="flex size-11 items-center justify-center rounded-xl text-primary transition-colors hover:bg-surface-subtle md:hidden"
+              className="flex size-11 items-center justify-center rounded-xl text-primary transition-colors hover:bg-surface-subtle lg:hidden"
             >
               <Menu className="size-6" />
             </button>
             <Link href="/" className="flex min-w-0 items-center gap-sm">
               <BrandMark />
               <span className="flex min-w-0 flex-col">
-                <span className="truncate text-title-md font-bold tracking-tight text-primary md:text-headline-sm">
+                <span className="truncate text-label-lg font-bold tracking-tight text-primary sm:text-title-md md:text-headline-sm">
                   Centro Médico Aurora
                 </span>
-                <span className="truncate text-label-sm tracking-wider text-muted-foreground uppercase">
-                  Salud Integral · Córdoba
+                <span className="truncate text-label-sm tracking-wide text-muted-foreground uppercase md:tracking-wider">
+                  Salud Integral
+                  <span className="hidden sm:inline"> · Córdoba</span>
                 </span>
               </span>
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-sm md:flex">
+          <nav className="hidden items-center gap-sm lg:flex">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
                 aria-current={item.active ? "page" : undefined}
                 className={cn(
-                  "rounded-xl px-md py-sm text-label-lg transition-colors",
+                  "rounded-xl px-sm py-sm text-label-lg transition-colors xl:px-md",
                   item.active
                     ? "bg-surface-subtle text-primary"
                     : "text-fg-secondary hover:bg-surface-subtle hover:text-foreground"
@@ -73,14 +74,14 @@ function SiteHeader() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Escribir por WhatsApp"
-              className={cn(ICON_LINK, "md:hidden")}
+              className={cn(ICON_LINK, "flex md:hidden")}
             >
               <MessageCircle className="size-5" />
             </a>
             <a
               href="tel:+543514859100"
               aria-label="Llamar al centro médico"
-              className={cn(ICON_LINK, "md:hidden")}
+              className={cn(ICON_LINK, "hidden sm:flex md:hidden")}
             >
               <Phone className="size-5" />
             </a>
@@ -96,7 +97,7 @@ function SiteHeader() {
             <button
               type="button"
               aria-label="Portal del paciente"
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark"
+              className="hidden size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark sm:flex"
             >
               <User className="size-4" />
             </button>
