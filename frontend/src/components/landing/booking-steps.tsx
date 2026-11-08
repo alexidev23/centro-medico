@@ -58,7 +58,10 @@ function StepCard({ number, title, description, Icon }: Step) {
 
 function BookingSteps() {
   return (
-    <section className="w-full py-lg md:py-xl">
+    <section
+      id="como-funciona"
+      className="w-full scroll-mt-20 py-lg md:scroll-mt-24 md:py-xl"
+    >
       <div className="mx-auto w-full max-w-page px-gutter-mobile md:px-gutter">
         <div className="flex flex-col gap-lg rounded-lg bg-surface-subtle p-lg shadow-card md:gap-xl md:p-xl">
           <div className="mx-auto flex max-w-2xl flex-col items-center gap-xs text-center">

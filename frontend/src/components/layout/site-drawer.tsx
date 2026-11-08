@@ -8,9 +8,9 @@ import { BrandMark } from "@/components/layout/brand-mark"
 
 const navigation = [
   { label: "Inicio", href: "/", icon: Home },
-  { label: "Especialidades", href: "#", icon: Stethoscope },
-  { label: "Profesionales", href: "#", icon: Users },
-  { label: "Cómo funciona", href: "#", icon: CircleHelp },
+  { label: "Especialidades", href: "#especialidades", icon: Stethoscope },
+  { label: "Profesionales", href: "#profesionales", icon: Users },
+  { label: "Cómo funciona", href: "#como-funciona", icon: CircleHelp },
   { label: "Ubicación", href: "#", icon: MapPin },
   { label: "Contacto", href: "#", icon: Headset },
 ]

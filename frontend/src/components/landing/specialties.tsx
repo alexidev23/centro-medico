@@ -88,7 +88,7 @@ function Specialties() {
   return (
     <section
       id="especialidades"
-      className="w-full bg-surface-subtle/40 py-lg md:bg-transparent md:py-xl"
+      className="w-full scroll-mt-20 bg-surface-subtle/40 py-lg md:scroll-mt-24 md:bg-transparent md:py-xl"
     >
       <div className="mx-auto flex w-full max-w-page flex-col gap-md px-gutter-mobile md:gap-lg md:px-gutter">
         <div className="flex flex-col gap-xs">

@@ -1,4 +1,5 @@
 import { BookingSteps } from "@/components/landing/booking-steps"
+import { Faq } from "@/components/landing/faq"
 import { Hero } from "@/components/landing/hero"
 import { Professionals } from "@/components/landing/professionals"
 import { Specialties } from "@/components/landing/specialties"
@@ -12,6 +13,7 @@ export default function Home() {
       <Specialties />
       <BookingSteps />
       <Professionals />
+      <Faq />
     </main>
   )
 }
