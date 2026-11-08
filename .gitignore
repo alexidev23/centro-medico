@@ -37,3 +37,6 @@ Thumbs.db
 
 # Design references (local only, not versioned)
 /docs/stitch_centro_m_dico_aurora_web/
+
+# Local tooling caches (machine-specific absolute paths)
+/.atl/
