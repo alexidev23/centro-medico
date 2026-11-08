@@ -145,7 +145,8 @@
   /* Layout */
   --container-page: 1280px;
 
-  /* Spacing scale */
+  /* Spacing scale. Named keys (xs..xl) also override max-w-* utilities, so never
+     use max-w-sm/md/lg/xl: write max-w-[24rem] and friends instead. */
   --spacing-gutter: 1.5rem;
   --spacing-gutter-mobile: 1rem;
   --spacing-margin: 3rem;

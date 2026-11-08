@@ -98,7 +98,7 @@ function Specialties() {
           <h2 className="text-title-md font-bold tracking-tight text-foreground md:text-headline-lg">
             Cuidado integral para cada etapa
           </h2>
-          <p className="max-w-xl text-body-sm text-fg-secondary md:text-body-md">
+          <p className="max-w-[36rem] text-body-sm text-fg-secondary md:text-body-md">
             Enfoque preventivo, seguimiento coordinado y consultorios equipados en
             un único lugar.
           </p>

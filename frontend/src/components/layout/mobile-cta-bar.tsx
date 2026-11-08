@@ -11,7 +11,7 @@ function MobileCtaBar() {
           href="#reservar-turno"
           className={cn(
             buttonVariants({ variant: "primary" }),
-            "w-full max-w-md shadow-raised"
+            "w-full max-w-[28rem] shadow-raised"
           )}
         >
           <CalendarDays className="size-5" />

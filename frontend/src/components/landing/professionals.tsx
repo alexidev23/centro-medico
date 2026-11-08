@@ -116,7 +116,7 @@ function Professionals() {
           <h2 className="text-title-md font-bold tracking-tight text-foreground md:text-headline-lg">
             Nuestros profesionales
           </h2>
-          <p className="max-w-xl text-body-sm text-fg-secondary md:text-body-md">
+          <p className="max-w-[36rem] text-body-sm text-fg-secondary md:text-body-md">
             Atención con dedicación exclusiva, rigor clínico y vocación de
             servicio.
           </p>
