@@ -69,7 +69,7 @@ function SiteHeader() {
 
           <div className="flex shrink-0 items-center gap-xs md:gap-md">
             <a
-              href="https://wa.me/543515550188"
+              href="https://wa.me/5493515228900"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Escribir por WhatsApp"
@@ -78,7 +78,7 @@ function SiteHeader() {
               <MessageCircle className="size-5" />
             </a>
             <a
-              href="tel:+543515550188"
+              href="tel:+543514859100"
               aria-label="Llamar al centro médico"
               className={cn(ICON_LINK, "md:hidden")}
             >

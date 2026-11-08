@@ -69,8 +69,8 @@ function SiteDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
 
           <div className="flex flex-col gap-1 rounded-xl bg-surface-subtle p-md">
             <p className="text-label-sm text-muted-foreground">Atención telefónica y WhatsApp</p>
-            <p className="text-title-md font-bold text-primary">+54 351 555-0188</p>
-            <p className="text-body-sm text-fg-secondary">Lun a Vie 8:00 a 20:00 · Sáb 8:00 a 13:00</p>
+            <p className="text-title-md font-bold text-primary">+54 351 522-8900</p>
+            <p className="text-body-sm text-fg-secondary">Lun a Vie 07:30 a 20:30 · Sáb 08:00 a 13:00</p>
           </div>
 
           <nav className="flex flex-col gap-xs">
@@ -89,7 +89,7 @@ function SiteDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
 
         <div className="bg-surface-subtle/60 p-lg">
           <p className="text-label-sm font-medium text-muted-foreground">
-            Av. Hipólito Yrigoyen 320, Nueva Córdoba
+            Av. Hipólito Yrigoyen 480, Nueva Córdoba
           </p>
           <p className="text-body-sm text-fg-secondary">Cuidado cálido, medicina de excelencia.</p>
         </div>
