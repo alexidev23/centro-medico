@@ -33,14 +33,14 @@ function Hero() {
 
       <div className="flex flex-col gap-sm md:col-span-7 md:row-start-2 md:flex-row">
         <Link
-          href="#especialidades-section"
+          href="#especialidades"
           className={cn(buttonVariants({ variant: "primary" }), "w-full md:w-auto")}
         >
           <CalendarDays className="size-5" />
           Sacar turno online
         </Link>
         <Link
-          href="#especialidades-section"
+          href="#especialidades"
           className={cn(buttonVariants({ variant: "secondary" }), "w-full md:w-auto")}
         >
           <Stethoscope className="size-5" />
