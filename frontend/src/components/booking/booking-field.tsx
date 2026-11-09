@@ -9,6 +9,7 @@ type BookingFieldProps = {
   label: string
   required?: boolean
   hint?: string
+  note?: string
   icon?: LucideIcon
   children: ReactNode
 }
@@ -18,6 +19,7 @@ function BookingField({
   label,
   required = false,
   hint,
+  note,
   icon: Icon,
   children,
 }: BookingFieldProps) {
@@ -31,6 +33,9 @@ function BookingField({
           {label}
           {required ? <span className="text-primary"> *</span> : null}
         </span>
+        {note ? (
+          <span className="text-[12px] font-normal text-fg-secondary">{note}</span>
+        ) : null}
       </label>
       <div
         className={cn(

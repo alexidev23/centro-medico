@@ -1,6 +1,7 @@
 import Image from "next/image"
-import { CalendarDays, Clock, MapPin } from "lucide-react"
+import { CalendarDays, Clock, MapPin, ShieldCheck, User } from "lucide-react"
 import { formatLongDate, type DateKey } from "@/lib/booking-availability"
+import type { PatientDraft } from "@/lib/booking-patient"
 import type { Professional } from "@/lib/professionals"
 import { cn } from "@/lib/utils"
 
@@ -8,9 +9,15 @@ type BookingSummaryProps = {
   professional: Professional
   date: DateKey | null
   time: string | null
+  patient: PatientDraft
 }
 
-function BookingSummary({ professional, date, time }: BookingSummaryProps) {
+function BookingSummary({
+  professional,
+  date,
+  time,
+  patient,
+}: BookingSummaryProps) {
   const ready = Boolean(date && time)
   const period = time ? (Number(time.slice(0, 2)) < 13 ? "Mañana" : "Tarde") : null
 
@@ -107,6 +114,46 @@ function BookingSummary({ professional, date, time }: BookingSummaryProps) {
             </dd>
           </div>
         </div>
+
+        {patient.insurance ? (
+          <div className="flex items-start gap-sm">
+            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-subtle text-primary">
+              <ShieldCheck className="size-4" aria-hidden="true" />
+            </span>
+            <div className="flex flex-col">
+              <dt className="text-[12px] text-fg-secondary">
+                Cobertura médica declarada
+              </dt>
+              <dd className="text-label-md font-semibold text-foreground">
+                {patient.insurance}
+              </dd>
+              {patient.affiliate ? (
+                <dd className="text-[12px] text-fg-secondary">
+                  Afiliado N° {patient.affiliate}
+                </dd>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {patient.name || patient.dni ? (
+          <div className="flex items-start gap-sm">
+            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-subtle text-primary">
+              <User className="size-4" aria-hidden="true" />
+            </span>
+            <div className="flex flex-col">
+              <dt className="text-[12px] text-fg-secondary">Paciente titular</dt>
+              <dd className="text-label-md font-semibold text-foreground">
+                {patient.name || "Sin nombre"}
+              </dd>
+              {patient.dni ? (
+                <dd className="text-[12px] text-fg-secondary">
+                  DNI {patient.dni}
+                </dd>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </dl>
     </aside>
   )

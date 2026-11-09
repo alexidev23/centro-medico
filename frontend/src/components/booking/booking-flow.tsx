@@ -59,7 +59,12 @@ function BookingFlow({ today, professional }: BookingFlowProps) {
         ) : null}
 
         <div className="lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-24">
-          <BookingSummary professional={professional} date={date} time={time} />
+          <BookingSummary
+            professional={professional}
+            date={date}
+            time={time}
+            patient={patient}
+          />
         </div>
       </div>
     </>

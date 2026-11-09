@@ -1,7 +1,7 @@
 # Stage B3 — Patient data
 
 **Branch:** `feat/booking-patient`
-**Status:** B3a, B3b and B3c implemented, B3d pending
+**Status:** B3a–B3d implemented — stage complete, awaiting review
 **Depends on:** `main` at `e53ad9d` (B2d)
 
 ## Objective
@@ -24,7 +24,7 @@ the measurement:
 | **B3a** | The rail follows the pick: `BookingScheduler` becomes `BookingFlow`, owns the rail and derives the step | 130 |
 | **B3b** | Field primitive, patient draft, step 3 card with the identity row | 168 |
 | **B3c** | Contact row and coverage row | 101 |
-| **B3d** | Consultation reason, consent, and the summary rows | pending |
+| **B3d** | Consultation reason, consent, and the summary rows | 105 |
 
 The rail goes first because it is a visible lie today: the page hardcodes `current={2}`, so
 a visitor typing into step 3 still reads *"Paso 2 · En curso"*.
@@ -166,4 +166,38 @@ once one is chosen and keeps the hint *"Tal como figura en tu credencial"*.
   the affiliate label reads *"Número de credencial"* until a coverage is chosen, then
   *"Número de credencial Swiss Medical"*.
 - Typing in phone, email or affiliate keeps the values across re-renders.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
+
+## Scope — B3d
+
+| File | Change |
+| --- | --- |
+| `frontend/src/components/booking/booking-field.tsx` | Adds the optional `note` in the label row |
+| `frontend/src/components/booking/booking-patient.tsx` | Adds the consultation reason and the consent |
+| `frontend/src/components/booking/booking-summary.tsx` | Adds the coverage and patient rows |
+| `frontend/src/components/booking/booking-flow.tsx` | Passes the draft to the summary |
+
+## Specification — B3d
+
+The reason field is a `textarea` wearing `inputClassName` plus `min-h-24 resize-none py-3`,
+`rows={3}`, the export's placeholder and the note *"Opcional • Confidencial"*. The consent is
+a native checkbox tinted with `accent-primary`, next to the two sentences of the export —
+*"Acepto los Términos del Servicio Médico y la Política de Privacidad de Datos."* and the
+cancellation commitment — with the document names emphasised, not linked.
+
+`BookingSummary` takes the draft and adds two rows only when they have something to say. The
+coverage row (*"Cobertura médica declarada"*, `ShieldCheck`) shows the chosen coverage and
+*"Afiliado N° …"* when an affiliate is typed; the patient row (*"Paciente titular"*, `User`)
+shows the name — *"Sin nombre"* if only the DNI is filled — and *"DNI …"*. Both reuse the
+`size-8` icon tile and the `dt`/`dd` rhythm of the rows above.
+
+## Acceptance criteria — B3d
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/reservar` stays Partial
+  Prerender.
+- The summary holds three rows before the form is filled and five after: the coverage row
+  reads *"OSDE"* and *"Afiliado N° 093-4819283-01"*, the patient row *"Facundo Ezequiel
+  Álvarez"* and *"DNI 38.491.702"*.
+- The reason text keeps its value, the note reads *"Opcional • Confidencial"*, and the
+  checkbox toggles between checked and unchecked.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.

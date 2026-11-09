@@ -151,6 +151,51 @@ function BookingPatient({ value, onChange }: BookingPatientProps) {
           />
         </BookingField>
       </div>
+
+      <div className="mt-md">
+        <BookingField
+          id="patient-reason"
+          label="Motivo de la consulta / Síntomas"
+          note="Opcional • Confidencial"
+        >
+          <textarea
+            id="patient-reason"
+            name="reason"
+            rows={3}
+            value={value.reason}
+            onChange={(event) => update({ reason: event.target.value })}
+            placeholder="Contanos brevemente el motivo (ej.: chequeo anual, dolor lumbar recurrente, control de estudios de laboratorio, apto físico)..."
+            className={cn(inputClassName, "min-h-24 resize-none py-3")}
+          />
+        </BookingField>
+      </div>
+
+      <label className="mt-sm flex cursor-pointer items-start gap-sm rounded-xl p-sm transition-colors hover:bg-background">
+        <input
+          type="checkbox"
+          name="accepted"
+          checked={value.accepted}
+          onChange={(event) => update({ accepted: event.target.checked })}
+          className="mt-0.5 size-5 shrink-0 cursor-pointer accent-primary"
+        />
+        <span className="flex flex-col gap-1">
+          <span className="text-label-md text-foreground">
+            Acepto los{" "}
+            <strong className="font-semibold text-primary">
+              Términos del Servicio Médico
+            </strong>{" "}
+            y la{" "}
+            <strong className="font-semibold text-primary">
+              Política de Privacidad de Datos
+            </strong>
+            .
+          </span>
+          <span className="text-[13px] text-fg-secondary">
+            Declaro que la información ingresada es fidedigna y me comprometo a
+            avisar con al menos 4 horas de anticipación en caso de cancelación.
+          </span>
+        </span>
+      </label>
     </section>
   )
 }
