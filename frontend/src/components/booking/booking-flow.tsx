@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import { BookingCalendar } from "@/components/booking/booking-calendar"
+import { BookingPatient } from "@/components/booking/booking-patient"
 import { BookingSlots } from "@/components/booking/booking-slots"
 import { BookingStepper } from "@/components/booking/booking-stepper"
 import { BookingSummary } from "@/components/booking/booking-summary"
 import type { DateKey } from "@/lib/booking-availability"
+import { EMPTY_PATIENT, type PatientDraft } from "@/lib/booking-patient"
 import type { Professional } from "@/lib/professionals"
 
 type BookingFlowProps = {
@@ -16,6 +18,7 @@ type BookingFlowProps = {
 function BookingFlow({ today, professional }: BookingFlowProps) {
   const [date, setDate] = useState<DateKey | null>(null)
   const [time, setTime] = useState<string | null>(null)
+  const [patient, setPatient] = useState<PatientDraft>(EMPTY_PATIENT)
 
   function selectDate(next: DateKey) {
     setDate(next)
@@ -49,7 +52,13 @@ function BookingFlow({ today, professional }: BookingFlowProps) {
           ) : null}
         </section>
 
-        <div className="lg:col-span-4 lg:sticky lg:top-24">
+        {date && time ? (
+          <div className="lg:col-span-8">
+            <BookingPatient value={patient} onChange={setPatient} />
+          </div>
+        ) : null}
+
+        <div className="lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-24">
           <BookingSummary professional={professional} date={date} time={time} />
         </div>
       </div>

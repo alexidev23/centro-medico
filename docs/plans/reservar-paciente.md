@@ -1,7 +1,7 @@
 # Stage B3 — Patient data
 
 **Branch:** `feat/booking-patient`
-**Status:** B3a implemented, B3b–B3d pending
+**Status:** B3a and B3b implemented, B3c–B3d pending
 **Depends on:** `main` at `e53ad9d` (B2d)
 
 ## Objective
@@ -22,7 +22,7 @@ the measurement:
 | Stage | Content | Measured |
 | --- | --- | --- |
 | **B3a** | The rail follows the pick: `BookingScheduler` becomes `BookingFlow`, owns the rail and derives the step | 130 |
-| **B3b** | Field primitive, patient draft, step 3 card with the identity row | pending |
+| **B3b** | Field primitive, patient draft, step 3 card with the identity row | 168 |
 | **B3c** | Contact row and coverage row | pending |
 | **B3d** | Consultation reason, consent, and the summary rows | pending |
 
@@ -93,6 +93,46 @@ renders `<ProfessionalSummary>` and `<BookingFlow>`. The rail no longer lives in
 - The mobile progress bar reads *"Paso 3 de 4: Tus datos"* and 75 %.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
 
+## Scope — B3b
+
+| File | Change |
+| --- | --- |
+| `frontend/src/lib/booking-patient.ts` | New — `PatientDraft` and `EMPTY_PATIENT` |
+| `frontend/src/components/booking/booking-field.tsx` | New — label, required mark, hint and icon adornment |
+| `frontend/src/components/booking/booking-patient.tsx` | New — step 3 card with the identity row |
+| `frontend/src/components/booking/booking-flow.tsx` | Owns the patient draft and renders the card in the left column |
+
+## Specification — B3b
+
+`BookingField` takes `id`, `label`, `required`, `hint`, `icon` and `children`. The label sits
+in `text-label-md font-semibold text-foreground` with the asterisk in `text-primary`; the
+control lives in a `relative` wrapper whose `[&_input]:pr-11` leaves room for the adornment;
+the icon is `size-5 text-fg-secondary`, pinned right, `pointer-events-none` and `aria-hidden`;
+the hint reads in `text-[12px] text-fg-secondary`.
+
+`BookingPatient` is the step 3 card: `rounded-xl bg-card p-md shadow-card md:p-lg`, the step
+badge *"3"* in `bg-primary-subtle text-primary`, `h2` *"Datos del Paciente"* in
+`text-title-md font-bold`, the subtitle *"Completá los datos para registrar la reserva
+médica."*, and the chip *"Campos obligatorios \*"* in `bg-surface-subtle`. The identity row is
+a `grid grid-cols-1 gap-md sm:grid-cols-2`: *"Nombre y Apellido"* (`autoComplete="name"`,
+`User` icon) and *"DNI / Documento"* (`inputMode="numeric"`, `IdCard` icon), both `required`
+and built on the shadcn `Input`. The value comes from the draft and every keystroke returns
+the whole draft through `onChange`.
+
+`BookingFlow` adds `patient` (`useState<PatientDraft>(EMPTY_PATIENT)`) and renders the card —
+wrapped in a `lg:col-span-8` div — only when `date && time` are set. The summary column gains
+explicit placement, `lg:col-start-9 lg:row-start-1 lg:row-span-2`, so it starts at the top of
+the grid and stays sticky across both cards instead of dropping to the second row.
+
 ## Acceptance criteria — B3b
 
-(to be written after B3b ships)
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/reservar` stays Partial
+  Prerender.
+- No step 3 card renders until a date and a time are picked; then it shows the badge *"3"*,
+  *"Datos del Paciente"*, the subtitle, the *"Campos obligatorios \*"* chip and the two
+  identity fields, each with its required mark and its icon.
+- Typing in either field keeps the value across re-renders and leaves the summary untouched.
+- From `lg` up the card sits directly under the step 2 card with the same width, and the
+  summary starts level with the step 2 card (sticky at `top-24` across both); below `lg` the
+  summary stacks after the card.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
