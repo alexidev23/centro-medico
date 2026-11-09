@@ -57,7 +57,7 @@ const SPECIALTIES: Specialty[] = [
 function SpecialtyCard({ name, description, tag, Icon }: Specialty) {
   return (
     <article className="flex flex-col gap-sm rounded-lg bg-card p-md shadow-card transition-shadow hover:shadow-raised md:gap-md md:p-lg">
-      <div className="flex items-start justify-between gap-sm">
+      <div className="flex flex-wrap items-start justify-between gap-sm">
         <div className="flex items-center gap-sm">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface-subtle text-primary md:size-12">
             <Icon className="size-5 md:size-6" aria-hidden="true" />
