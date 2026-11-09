@@ -23,7 +23,7 @@ The records move to `lib/professionals.ts` with a `slug`, plus `getProfessionalB
 `components/landing/professionals.tsx` keeps only the card and imports the data. The move is
 verbatim except for the added slugs, so it lands as its own commit: together with the banner
 the stage would reach 244 changed lines, over the 150–200 cap. Splitting it leaves two
-reviewable units, 146 lines (the move) and 90 (the behavior), each inside the limit.
+reviewable units, 146 lines (the move) and 105 (the behavior), each inside the limit.
 
 ### The page keeps its static shell; `searchParams` is read behind Suspense
 

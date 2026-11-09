@@ -1,8 +1,10 @@
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { buttonVariants } from "@/components/ui/button"
 import { PROFESSIONALS, type Professional } from "@/lib/professionals"
 
 function ProfessionalCard({
+  slug,
   name,
   specialty,
   licence,
@@ -33,9 +35,12 @@ function ProfessionalCard({
           </div>
         </div>
       </div>
-      <Button type="button" className="w-full">
+      <Link
+        href={`/reservar?profesional=${slug}`}
+        className={buttonVariants({ className: "w-full" })}
+      >
         Pedir turno
-      </Button>
+      </Link>
     </article>
   )
 }
