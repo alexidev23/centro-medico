@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { connection } from "next/server"
-import { BookingScheduler } from "@/components/booking/booking-scheduler"
-import { BookingStepper } from "@/components/booking/booking-stepper"
+import { BookingFlow } from "@/components/booking/booking-flow"
 import { ProfessionalSummary } from "@/components/booking/professional-summary"
 import { todayKey } from "@/lib/booking-availability"
 import { getProfessionalBySlug } from "@/lib/professionals"
@@ -29,7 +28,7 @@ async function BookingContent({
   return (
     <>
       <ProfessionalSummary professional={professional} />
-      <BookingScheduler today={todayKey()} professional={professional} />
+      <BookingFlow today={todayKey()} professional={professional} />
     </>
   )
 }
@@ -37,7 +36,6 @@ async function BookingContent({
 export default function ReservarPage(props: PageProps<"/reservar">) {
   return (
     <main className="mx-auto flex w-full max-w-page flex-col gap-lg px-gutter-mobile py-lg md:px-gutter md:py-xl">
-      <BookingStepper current={2} />
       <Suspense fallback={null}>
         <BookingContent searchParams={props.searchParams} />
       </Suspense>
