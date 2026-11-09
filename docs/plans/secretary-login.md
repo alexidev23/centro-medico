@@ -1,7 +1,7 @@
 # Stage B5 — Secretary sign-in
 
 **Branch:** `feat/secretary-login`
-**Status:** B5a and B5b committed, ready for review
+**Status:** B5a and B5b shipped and merged into `main`; B5c on `feat/login-demo-credentials`
 **Depends on:** `main` at `6cf64fd` (B4b)
 
 ## Objective
@@ -135,3 +135,28 @@ text-fg-secondary`. The address, phone and hours come from the app's own data, n
   25.326 or "datos ficticios" string exists.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console, and
   a filled submit still lands on `/panel` without a query string.
+
+## B5c — Demo credentials
+
+**Why.** The user asked for the test credentials to be visible, so the screen can actually be
+tried. B5 dropped that box because nothing compared a credential; it comes back as a reference,
+not as a gate.
+
+**What changes.** A box inside the card, between the form and the clinic metadata:
+*"Acceso de prueba"* with `recepcion@centromedicoaurora.com.ar` and `demo2026`. The honest line
+under the CTA grows one clause, so the box cannot be read as a requirement: *"Sin backend
+todavía: este ingreso no autentica y cualquier correo y clave abre el panel de demostración."*
+No credential is compared, there is no error state, and nothing is persisted.
+
+**Layout.** `bg-surface-subtle` with `BadgeCheck`, the values in `bg-card` chips with `break-all`
+so the address fits a 320 px viewport, and `select-all` so a click grabs the whole value.
+
+### Acceptance criteria — B5c
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0.
+- The box shows both values at 320 px without horizontal scroll or clipped text.
+- No credential is compared: no success or error banner exists, and the value appears as plain
+  text only.
+- An empty submit stays on `/ingreso`; a filled one still lands on `/panel` without a query
+  string.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.

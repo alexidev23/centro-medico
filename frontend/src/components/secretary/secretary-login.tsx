@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Building2, Eye, EyeOff, KeyRound, Mail, ShieldPlus } from "lucide-react"
+import { ArrowRight, BadgeCheck, Building2, Eye, EyeOff, KeyRound, Mail, ShieldPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -164,10 +164,29 @@ function SecretaryLogin() {
           </Button>
 
           <p className="text-body-sm text-fg-secondary">
-            Sin backend todavía: este ingreso no autentica, solo abre el panel de
-            demostración.
+            Sin backend todavía: este ingreso no autentica y cualquier correo y
+            clave abre el panel de demostración.
           </p>
         </form>
+
+        <div className="mt-md flex flex-col gap-1.5 rounded-lg bg-surface-subtle p-sm text-body-sm">
+          <span className="flex items-center gap-1.5 text-label-sm font-semibold tracking-wide text-primary">
+            <BadgeCheck className="size-4" aria-hidden="true" />
+            Acceso de prueba
+          </span>
+          <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-fg-secondary">
+            <span>Correo:</span>
+            <code className="rounded bg-card px-1.5 py-0.5 font-semibold break-all text-foreground select-all">
+              recepcion@centromedicoaurora.com.ar
+            </code>
+          </span>
+          <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-fg-secondary">
+            <span>Clave:</span>
+            <code className="rounded bg-card px-1.5 py-0.5 font-semibold text-foreground select-all">
+              demo2026
+            </code>
+          </span>
+        </div>
 
         <div className="mt-lg flex flex-col items-center gap-1 border-t border-surface-subtle pt-md text-center">
           <span className="flex items-center gap-1.5 text-fg-secondary">
