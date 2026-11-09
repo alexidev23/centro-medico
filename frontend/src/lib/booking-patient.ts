@@ -9,6 +9,8 @@ type PatientDraft = {
   accepted: boolean
 }
 
+const INSURANCES = ["OSDE", "Swiss Medical", "APROSS", "Particular"] as const
+
 const EMPTY_PATIENT: PatientDraft = {
   name: "",
   dni: "",
@@ -20,5 +22,5 @@ const EMPTY_PATIENT: PatientDraft = {
   accepted: false,
 }
 
-export { EMPTY_PATIENT }
+export { EMPTY_PATIENT, INSURANCES }
 export type { PatientDraft }

@@ -1,7 +1,7 @@
 # Stage B3 — Patient data
 
 **Branch:** `feat/booking-patient`
-**Status:** B3a and B3b implemented, B3c–B3d pending
+**Status:** B3a, B3b and B3c implemented, B3d pending
 **Depends on:** `main` at `e53ad9d` (B2d)
 
 ## Objective
@@ -23,7 +23,7 @@ the measurement:
 | --- | --- | --- |
 | **B3a** | The rail follows the pick: `BookingScheduler` becomes `BookingFlow`, owns the rail and derives the step | 130 |
 | **B3b** | Field primitive, patient draft, step 3 card with the identity row | 168 |
-| **B3c** | Contact row and coverage row | pending |
+| **B3c** | Contact row and coverage row | 101 |
 | **B3d** | Consultation reason, consent, and the summary rows | pending |
 
 The rail goes first because it is a visible lie today: the page hardcodes `current={2}`, so
@@ -135,4 +135,35 @@ the grid and stays sticky across both cards instead of dropping to the second ro
 - From `lg` up the card sits directly under the step 2 card with the same width, and the
   summary starts level with the step 2 card (sticky at `top-24` across both); below `lg` the
   summary stacks after the card.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
+
+## Scope — B3c
+
+| File | Change |
+| --- | --- |
+| `frontend/src/components/ui/input.tsx` | Exports `inputClassName` so the native select shares the field look |
+| `frontend/src/lib/booking-patient.ts` | Adds the coverage fixtures |
+| `frontend/src/components/booking/booking-patient.tsx` | Adds the contact row and the coverage row |
+
+## Specification — B3c
+
+The card's grid gains four fields. *"Teléfono Celular"* is `type="tel"` with
+`autoComplete="tel"` and the hint *"Enviaremos recordatorio por WhatsApp 24 hs antes"*.
+*"Correo Electrónico"* is `type="email"` with `autoComplete="email"`. *"Obra Social o
+Prepaga"* is a native `select` sharing `inputClassName` plus `appearance-none
+cursor-pointer`, adorned with `ChevronDown`, offering a disabled *"Elegí tu cobertura"* and
+the fixtures `OSDE`, `Swiss Medical`, `APROSS`, `Particular`, with the hint *"Presentá tu
+credencial digital y DNI al ingresar"*. *"Número de credencial"* takes the coverage's name
+once one is chosen and keeps the hint *"Tal como figura en tu credencial"*.
+
+## Acceptance criteria — B3c
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/reservar` stays Partial
+  Prerender.
+- The card renders all six fields after a date and a time are picked, two per row from `sm`
+  up and one per row below.
+- The coverage select offers *"Elegí tu cobertura"* plus the four fixtures, starts empty, and
+  the affiliate label reads *"Número de credencial"* until a coverage is chosen, then
+  *"Número de credencial Swiss Medical"*.
+- Typing in phone, email or affiliate keeps the values across re-renders.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
