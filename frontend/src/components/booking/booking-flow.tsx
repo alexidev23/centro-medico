@@ -31,7 +31,12 @@ function BookingFlow({ today, professional }: BookingFlowProps) {
     return (
       <>
         <BookingStepper current={4} />
-        <BookingConfirmation professional={professional} date={date} time={time} />
+        <BookingConfirmation
+          professional={professional}
+          date={date}
+          time={time}
+          patient={patient}
+        />
       </>
     )
   }

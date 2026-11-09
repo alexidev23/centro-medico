@@ -1,7 +1,7 @@
 # Stage B4 — Booking confirmation
 
 **Branch:** `feat/booking-confirmation`
-**Status:** B4a implemented, B4b pending
+**Status:** B4 complete — awaiting review
 **Depends on:** `main` at `e9d1a04` (B3d)
 
 ## Objective
@@ -63,8 +63,8 @@ badge reads the same and does not keep moving in a medical product.
 
 | Stage | Content | Est. |
 | --- | --- | --- |
-| **B4a** | CTA + gate in the summary, `confirmed` state, rail to step 4, confirmation header (badge, title, honest note, professional card with date/time/office/address) | ~130 |
-| **B4b** | Patient and coverage bento, day instructions, final actions (real WhatsApp + back home) | ~110 |
+| **B4a** | CTA + gate in the summary, `confirmed` state, rail to step 4, confirmation header (badge, title, honest note, professional card with date/time/office/address) | 155 |
+| **B4b** | Patient and coverage bento, day instructions, final actions (real WhatsApp + back home) | 95 |
 
 ## Scope — B4a
 
@@ -124,4 +124,42 @@ obligatorios y aceptá los términos para confirmar."*
 
 ## Acceptance criteria — B4b
 
-(to be written after B4a ships)
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/reservar` stays Partial
+  Prerender.
+- The bento shows *"Paciente"* with the typed name and *"DNI 38.491.702"*, and *"Cobertura
+  Médica"* with *"OSDE"* and *"Credencial N° 093-4819283-01"*.
+- The instructions read *"Presentate 10 minutos antes con tu credencial y DNI. Si necesitás
+  cancelar o reprogramar, escribinos por WhatsApp."* — no *"Mis Turnos"* link and no
+  cancellation window that contradicts the step 3 consent.
+- *"Asistencia por WhatsApp"* points at `https://wa.me/5493515228900`, and *"Volver al inicio"*
+  points at `/`.
+- No booking code, PDF, calendar file or QR anywhere in the view.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
+
+## Scope — B4b
+
+| File | Change |
+| --- | --- |
+| `frontend/src/components/booking/booking-confirmation.tsx` | Adds the patient and coverage bento, the day instructions and the closing actions |
+| `frontend/src/components/booking/booking-flow.tsx` | Passes the patient draft to the confirmation |
+
+## Specification — B4b
+
+Two `rounded-xl bg-background p-md` tiles in a `grid grid-cols-1 gap-md sm:grid-cols-2`:
+*"Paciente"* with the name in `text-title-md font-bold` and *"DNI …"*; *"Cobertura Médica"*
+with the coverage and *"Credencial N° …"* when an affiliate was typed. Both overlines use
+`text-label-sm font-semibold tracking-wider text-fg-secondary uppercase`.
+
+The instructions callout is `rounded-xl bg-surface-subtle p-md` with an `Info` tile, the
+heading *"Instrucciones para el día de tu consulta"* and the sentence above with the *"10
+minutos antes"* span emphasised.
+
+The closing block is `rounded-xl bg-background p-md`, stacked until `sm` and split with
+`sm:justify-between` after: a `Headset` tile, *"¿Tenés alguna duda sobre tu cita?"* with the
+subtitle *"Escribinos y te respondemos desde la sede de Nueva Córdoba."*, and a
+`buttonVariants({ variant: "primary", size: "sm" })` anchor to the real WhatsApp number.
+*"Volver al inicio"* sits centred below as a `ghost` link to `/`.
+
+The export puts the professional card and the bento side by side, five and seven columns. The
+confirmation card here is `max-w-3xl`, so the blocks stack: at that width two columns would
+squeeze the rows and the professional detail.
