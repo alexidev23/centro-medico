@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Eye, EyeOff, KeyRound, Mail, ShieldPlus } from "lucide-react"
+import { ArrowRight, Building2, Eye, EyeOff, KeyRound, Mail, ShieldPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -15,6 +15,7 @@ const labelClassName =
 function SecretaryLogin() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const [recoveryOpen, setRecoveryOpen] = useState(false)
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -121,6 +122,42 @@ function SecretaryLogin() {
             </div>
           </div>
 
+          <div className="flex flex-wrap items-center justify-between gap-x-sm gap-y-1">
+            <label
+              htmlFor="remember"
+              className="flex min-h-11 cursor-pointer items-center gap-2 text-body-sm text-fg-secondary select-none"
+            >
+              <input
+                id="remember"
+                name="remember"
+                type="checkbox"
+                defaultChecked
+                className="size-5 cursor-pointer rounded accent-primary"
+              />
+              Recordar este equipo
+            </label>
+            <button
+              type="button"
+              onClick={() => setRecoveryOpen((current) => !current)}
+              aria-expanded={recoveryOpen}
+              aria-controls="recovery-note"
+              className="flex min-h-11 items-center py-2 text-label-md text-primary transition-colors hover:underline hover:underline-offset-4"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+
+          {recoveryOpen ? (
+            <p
+              id="recovery-note"
+              className="rounded-lg bg-surface-subtle px-sm py-3 text-body-sm leading-snug text-fg-secondary"
+            >
+              Para restablecer tu acceso administrativo, comunicate con soporte
+              interno de IT (int. 104) o coordiná la verificación con la
+              jefatura médica.
+            </p>
+          ) : null}
+
           <Button type="submit" className="mt-1 w-full gap-xs">
             Ingresar al sistema
             <ArrowRight className="size-4" aria-hidden="true" />
@@ -131,6 +168,21 @@ function SecretaryLogin() {
             demostración.
           </p>
         </form>
+
+        <div className="mt-lg flex flex-col items-center gap-1 border-t border-surface-subtle pt-md text-center">
+          <span className="flex items-center gap-1.5 text-fg-secondary">
+            <Building2 className="size-4" aria-hidden="true" />
+            <span className="text-label-sm font-semibold tracking-wide">
+              Sede Nueva Córdoba
+            </span>
+          </span>
+          <p className="text-body-sm text-fg-secondary">
+            Av. Hipólito Yrigoyen 480 · Tel: +54 351 522-8900
+          </p>
+          <p className="text-body-sm text-fg-secondary">
+            Horario de atención presencial: lunes a viernes de 07:30 a 20:30 hs.
+          </p>
+        </div>
       </div>
     </div>
   )

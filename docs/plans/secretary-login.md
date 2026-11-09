@@ -1,7 +1,7 @@
 # Stage B5 — Secretary sign-in
 
 **Branch:** `feat/secretary-login`
-**Status:** plan approved, B5a in progress
+**Status:** B5a and B5b committed, ready for review
 **Depends on:** `main` at `6cf64fd` (B4b)
 
 ## Objective
@@ -104,6 +104,34 @@ with *"Esta pantalla todavía no está construida."* and a `secondary` link back
 - `/panel` says the panel is not built and links back to `/ingreso`.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
 
+## Specification — B5b
+
+**Utility row** — between the last field and the CTA, `flex flex-wrap items-center justify-between
+gap-x-sm gap-y-1` so the pair wraps instead of overflowing at 320 px. Left: a `<label>` for a
+`type="checkbox"` named `remember`, checked by default as in the export, `size-5 accent-primary`,
+with *"Recordar este equipo"* in `text-body-sm text-fg-secondary`. Right: a `type="button"` with
+*"¿Olvidaste tu contraseña?"* in `text-label-md text-primary`. Both keep a 44 px touch target
+(`min-h-11`).
+
+**Recovery** — no `alert()`. The button toggles an inline disclosure, `aria-expanded` and
+`aria-controls` included, rendered only while open, in `bg-surface-subtle`, with the export's
+text: *"Para restablecer tu acceso administrativo, comunicate con soporte interno de IT
+(int. 104) o coordiná la verificación con la jefatura médica."*
+
+**Clinic metadata** — inside the card, after the form, separated by `border-t
+border-surface-subtle` and centered: `Building2` plus *"Sede Nueva Córdoba"* in
+`text-label-sm font-semibold`, then *"Av. Hipólito Yrigoyen 480 · Tel: +54 351 522-8900"* and
+*"Horario de atención presencial: lunes a viernes de 07:30 a 20:30 hs."* in `text-body-sm
+text-fg-secondary`. The address, phone and hours come from the app's own data, not the export's
+`320` / `555-0188`.
+
 ## Acceptance criteria — B5b
 
-(to be written after B5a ships)
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0.
+- The utility row fits at 320 px without horizontal scroll, wrapping if it needs to.
+- Toggling "¿Olvidaste tu contraseña?" shows and hides the inline note, and no browser dialog
+  appears.
+- The metadata footer shows Yrigoyen 480, +54 351 522-8900 and the landing hours; no TLS, Ley
+  25.326 or "datos ficticios" string exists.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console, and
+  a filled submit still lands on `/panel` without a query string.
