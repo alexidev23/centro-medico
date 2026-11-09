@@ -1,7 +1,7 @@
 # Stage B2 — Calendar and slot selection
 
 **Branch:** `feat/booking-calendar`
-**Status:** B2a implemented, B2b and B2c pending
+**Status:** B2a and B2b implemented, B2c and B2d pending
 **Depends on:** `main` at `236c827` (B1b)
 
 ## Objective
@@ -13,16 +13,17 @@ step 3.
 
 ## Decisions
 
-### B2 is three stages
+### B2 is four stages
 
 The 150–200 cap forces the split by measurement, not by guess. **B2a** builds the
 availability model and renders the current month with its availability marks (184
-hand-authored lines). **B2b** adds month navigation, the day pick and the slot grid for the
-picked day (~150). **B2c** adds the sticky live summary (~60). Each stage leaves a visible,
-reviewable result on `/reservar`, and each stays under the cap without rewriting what the
-previous one built.
+hand-authored lines). **B2b** makes the calendar interactive — month navigation, the day
+pick, and the step 2 card that owns the picked date (184). **B2c** adds the slot grid for
+the picked day (~110). **B2d** adds the sticky live summary (~60). Each stage leaves a
+visible, reviewable result on `/reservar`, and each stays under the cap without rewriting
+what the previous one built.
 
-Selection arrives with B2b, so B2a renders the grid without any affordance that promises a
+Selection arrived with B2b, so B2a rendered the grid without any affordance that promised a
 click: no hover state and no cursor change until the days actually respond.
 
 ### Availability is a local fixture until the backend exists
@@ -103,21 +104,34 @@ calendar needs, and `/reservar` keeps its partial prerender.
 `<BookingCalendar today={todayKey()} />`. The shell (booking header + step rail) is
 unchanged, so `/reservar` keeps its partial prerender.
 
-## Specification — B2b (after review)
+## Specification — B2b (implemented)
 
-`BookingScheduler` (client) owns `selectedDate` and `selectedTime` and lays out the 12-column
-grid: calendar and slots in eight columns, the summary in four. `BookingCalendar` becomes
-controlled (`value`, `onChange`) and gains the month navigation: two 36px buttons
-(`ChevronLeft` / `ChevronRight`, `aria-label="Mes anterior"` / `"Mes siguiente"`), with back
-disabled on the current month (`disabled:opacity-40 disabled:cursor-not-allowed`), plus
-`shiftMonth` in the model. Available days become `button`s with `aria-label` from
-`formatLongDate` (*"Jueves, 15 de octubre de 2026"*), `aria-pressed`, hover state and the
-primary fill when selected, showing *"Elegido"* from `sm` up. `BookingSlots` renders the
-selected day's slots in two groups — *"Turno Mañana (09:00 - 13:00 hs)"* and *"Turno Tarde
-(15:00 - 19:30 hs)"* — with available, taken (`line-through opacity-70`, *"(No disp.)"*) and
-selected states, plus the *"N horarios libres"* count.
+`BookingScheduler` (client) owns `selectedDate` and renders the step 2 card:
+`rounded-xl bg-card p-md shadow-card md:p-lg` with the step badge (*"2"*) and the
+*"Elegí fecha y horario disponible"* heading. `BookingCalendar` becomes a client component
+and the month block only — it no longer renders the card — and receives `today`, `value` and
+`onChange`.
 
-## Specification — B2c (after B2b)
+- Month heading plus two 32/36px buttons (`ChevronLeft` / `ChevronRight`,
+  `aria-label="Mes anterior"` / `"Mes siguiente"`) that move `view` through `shiftMonth`.
+  Back is disabled while the view is the current month
+  (`disabled:cursor-not-allowed disabled:opacity-40`).
+- Available days become `button`s: `disabled` on past days, weekends and adjacent months;
+  `aria-label` from `formatLongDate` (*"Jueves, 15 de octubre de 2026"*); `aria-pressed`
+  only on the selectable ones; `hover:bg-surface-subtle` on the available fill; the selected
+  day takes `bg-primary text-primary-foreground shadow-card` and shows *"Elegido"* from `sm`
+  up instead of the availability dot.
+
+## Specification — B2c (after review)
+
+`daySchedule(key)` joins the model: Monday-to-Friday slots every 30 minutes, 09:00–12:30 and
+15:00–19:00, with a slot marked taken when `(day + slot index) % 3 === 0` — a deterministic
+stand-in, not business logic. `BookingSlots` renders the picked day's groups — *"Turno Mañana
+(09:00 - 13:00 hs)"* and *"Turno Tarde (15:00 - 19:30 hs)"* — with available, taken
+(`line-through`, *"(No disp.)"*) and selected states, plus the *"N horarios libres"* count.
+`BookingScheduler` gains `selectedTime` and resets it when the date changes.
+
+## Specification — B2d (after B2c)
 
 `BookingSummary` shows the doctor snapshot, the formatted date, the time with a *Mañana* /
 *Tarde* tag, and the office with the app's address. Coverage, patient and price wait for
@@ -132,3 +146,14 @@ B3/B4. Below `lg` the summary stacks after the slots, not sticky.
   dot; today and the future weekdays render with the dot and the primary tint.
 - CDP probe at 320 / 390 / 768 / 1280 with `mobile:false`: no horizontal overflow and
   `documentElement.scrollWidth <= innerWidth`; screenshots reviewed.
+
+## Acceptance criteria — B2b
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/reservar` stays Partial
+  Prerender.
+- The previous-month control is disabled on the current month; both controls move the
+  heading (`Noviembre 2026` → `Diciembre 2026` and back) and enable back once away from it.
+- Clicking an available day marks only it (`aria-pressed="true"`, count 1) and shows
+  *"Elegido"* from `sm` up; clicking another day moves the mark.
+- Past days, weekends and adjacent-month days stay `disabled`.
+- CDP probe at 320 / 390 / 768 / 1280 with `mobile:false`: no overflow, empty console.

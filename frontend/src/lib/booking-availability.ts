@@ -18,6 +18,14 @@ const MONTH_FORMATTER = new Intl.DateTimeFormat("es-AR", {
   timeZone: "UTC",
 })
 
+const LONG_DATE_FORMATTER = new Intl.DateTimeFormat("es-AR", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+})
+
 function pad(value: number): string {
   return String(value).padStart(2, "0")
 }
@@ -79,16 +87,27 @@ function isSelectableDay(key: DateKey, today: DateKey): boolean {
   return weekday !== 0 && weekday !== 6
 }
 
+function shiftMonth({ year, month }: MonthRef, delta: number): MonthRef {
+  const date = new Date(Date.UTC(year, month - 1 + delta, 1, 12))
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 }
+}
+
 function formatMonth(year: number, month: number): string {
   const name = MONTH_FORMATTER.format(new Date(Date.UTC(year, month - 1, 1, 12)))
   return `${capitalize(name)} ${year}`
 }
 
+function formatLongDate(key: DateKey): string {
+  return capitalize(LONG_DATE_FORMATTER.format(parseDateKey(key)))
+}
+
 export {
+  formatLongDate,
   formatMonth,
   isSelectableDay,
   monthGrid,
   monthOf,
+  shiftMonth,
   todayKey,
 }
 export type { DateKey, MonthCell, MonthRef }

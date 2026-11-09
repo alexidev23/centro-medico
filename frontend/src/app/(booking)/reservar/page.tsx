@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { connection } from "next/server"
-import { BookingCalendar } from "@/components/booking/booking-calendar"
+import { BookingScheduler } from "@/components/booking/booking-scheduler"
 import { BookingStepper } from "@/components/booking/booking-stepper"
 import { ProfessionalSummary } from "@/components/booking/professional-summary"
 import { todayKey } from "@/lib/booking-availability"
@@ -29,7 +29,7 @@ async function BookingContent({
   return (
     <>
       <ProfessionalSummary professional={professional} />
-      <BookingCalendar today={todayKey()} />
+      <BookingScheduler today={todayKey()} />
     </>
   )
 }
