@@ -40,3 +40,7 @@ Thumbs.db
 
 # Local tooling caches (machine-specific absolute paths)
 /.atl/
+
+# Agent skill installs (reinstallable from skills-lock.json)
+/.claude/
+/.agents/
