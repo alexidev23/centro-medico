@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { BookingCalendar } from "@/components/booking/booking-calendar"
+import { BookingConfirmation } from "@/components/booking/booking-confirmation"
 import { BookingPatient } from "@/components/booking/booking-patient"
 import { BookingSlots } from "@/components/booking/booking-slots"
 import { BookingStepper } from "@/components/booking/booking-stepper"
@@ -19,10 +20,20 @@ function BookingFlow({ today, professional }: BookingFlowProps) {
   const [date, setDate] = useState<DateKey | null>(null)
   const [time, setTime] = useState<string | null>(null)
   const [patient, setPatient] = useState<PatientDraft>(EMPTY_PATIENT)
+  const [confirmed, setConfirmed] = useState(false)
 
   function selectDate(next: DateKey) {
     setDate(next)
     setTime(null)
+  }
+
+  if (confirmed && date && time) {
+    return (
+      <>
+        <BookingStepper current={4} />
+        <BookingConfirmation professional={professional} date={date} time={time} />
+      </>
+    )
   }
 
   return (
@@ -64,6 +75,7 @@ function BookingFlow({ today, professional }: BookingFlowProps) {
             date={date}
             time={time}
             patient={patient}
+            onConfirm={() => setConfirmed(true)}
           />
         </div>
       </div>

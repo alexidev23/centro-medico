@@ -1,5 +1,6 @@
 import Image from "next/image"
-import { CalendarDays, Clock, MapPin, ShieldCheck, User } from "lucide-react"
+import { ArrowRight, CalendarDays, Clock, MapPin, ShieldCheck, User } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { formatLongDate, type DateKey } from "@/lib/booking-availability"
 import type { PatientDraft } from "@/lib/booking-patient"
 import type { Professional } from "@/lib/professionals"
@@ -10,6 +11,7 @@ type BookingSummaryProps = {
   date: DateKey | null
   time: string | null
   patient: PatientDraft
+  onConfirm: () => void
 }
 
 function BookingSummary({
@@ -17,8 +19,19 @@ function BookingSummary({
   date,
   time,
   patient,
+  onConfirm,
 }: BookingSummaryProps) {
   const ready = Boolean(date && time)
+  const canConfirm = Boolean(
+    date &&
+      time &&
+      patient.name &&
+      patient.dni &&
+      patient.phone &&
+      patient.email &&
+      patient.insurance &&
+      patient.accepted,
+  )
   const period = time ? (Number(time.slice(0, 2)) < 13 ? "Mañana" : "Tarde") : null
 
   return (
@@ -155,6 +168,26 @@ function BookingSummary({
           </div>
         ) : null}
       </dl>
+
+      <div className="flex flex-col gap-1.5 border-t border-border pt-md">
+        <Button
+          type="button"
+          onClick={onConfirm}
+          disabled={!canConfirm}
+          className="group w-full gap-xs"
+        >
+          Confirmar turno
+          <ArrowRight
+            className="size-4 transition-transform group-hover:translate-x-0.5"
+            aria-hidden="true"
+          />
+        </Button>
+        {canConfirm ? null : (
+          <p className="text-[12px] text-fg-secondary">
+            Completá los datos obligatorios y aceptá los términos para confirmar.
+          </p>
+        )}
+      </div>
     </aside>
   )
 }
