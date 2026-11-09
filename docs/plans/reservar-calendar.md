@@ -1,7 +1,7 @@
 # Stage B2 — Calendar and slot selection
 
 **Branch:** `feat/booking-calendar`
-**Status:** B2a and B2b implemented, B2c and B2d pending
+**Status:** B2a, B2b and B2c implemented, B2d pending
 **Depends on:** `main` at `236c827` (B1b)
 
 ## Objective
@@ -122,14 +122,18 @@ and the month block only — it no longer renders the card — and receives `tod
   day takes `bg-primary text-primary-foreground shadow-card` and shows *"Elegido"* from `sm`
   up instead of the availability dot.
 
-## Specification — B2c (after review)
+## Specification — B2c (implemented)
 
 `daySchedule(key)` joins the model: Monday-to-Friday slots every 30 minutes, 09:00–12:30 and
-15:00–19:00, with a slot marked taken when `(day + slot index) % 3 === 0` — a deterministic
-stand-in, not business logic. `BookingSlots` renders the picked day's groups — *"Turno Mañana
-(09:00 - 13:00 hs)"* and *"Turno Tarde (15:00 - 19:30 hs)"* — with available, taken
-(`line-through`, *"(No disp.)"*) and selected states, plus the *"N horarios libres"* count.
-`BookingScheduler` gains `selectedTime` and resets it when the date changes.
+15:00–19:00 (17 per day: eight in the morning, nine in the afternoon), with a slot marked
+taken when `(day + slot index) % 3 === 0` — a deterministic stand-in, not business logic.
+`BookingSlots` renders the picked day's groups — *"Turno Mañana (09:00 - 13:00 hs)"* and
+*"Turno Tarde (15:00 - 19:30 hs)"*, the windows the export prints — with available, taken
+(`line-through` on the time, *"(No disp.)"* from `sm` up) and selected states, plus the
+*"N horarios libres"* count. The heading reads *"Horarios para el miércoles 11 de
+noviembre"*: `formatDayMonth` keeps the weekday lowercase and drops the year, which the
+calendar already shows. `BookingScheduler` gains `selectedTime` and resets it when the date
+changes.
 
 ## Specification — B2d (after B2c)
 
@@ -156,4 +160,14 @@ B3/B4. Below `lg` the summary stacks after the slots, not sticky.
 - Clicking an available day marks only it (`aria-pressed="true"`, count 1) and shows
   *"Elegido"* from `sm` up; clicking another day moves the mark.
 - Past days, weekends and adjacent-month days stay `disabled`.
+- CDP probe at 320 / 390 / 768 / 1280 with `mobile:false`: no overflow, empty console.
+
+## Acceptance criteria — B2c
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/reservar` stays Partial
+  Prerender.
+- No slot grid renders until a day is picked; picking day 10 of November 2026 shows 17 slots
+  (five taken) and *"12 horarios libres"*; picking day 11 shows *"11 horarios libres"*.
+- Taken slots are `disabled` and struck; picking a free slot marks exactly one
+  (`aria-pressed="true"`); picking another day clears the time.
 - CDP probe at 320 / 390 / 768 / 1280 with `mobile:false`: no overflow, empty console.

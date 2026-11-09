@@ -26,6 +26,31 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat("es-AR", {
   timeZone: "UTC",
 })
 
+const DAY_MONTH_FORMATTER = new Intl.DateTimeFormat("es-AR", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+})
+
+type SlotGroup = {
+  label: string
+  slots: { time: string; taken: boolean }[]
+}
+
+function slotTimes(startMinutes: number, endMinutes: number): string[] {
+  const count = (endMinutes - startMinutes) / 30
+
+  return Array.from({ length: count }, (_, index) => {
+    const minutes = startMinutes + index * 30
+    return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`
+  })
+}
+
+const MORNING_SLOTS = slotTimes(9 * 60, 13 * 60)
+const AFTERNOON_SLOTS = slotTimes(15 * 60, 19 * 60 + 30)
+const DAY_SLOTS = [...MORNING_SLOTS, ...AFTERNOON_SLOTS]
+
 function pad(value: number): string {
   return String(value).padStart(2, "0")
 }
@@ -101,7 +126,26 @@ function formatLongDate(key: DateKey): string {
   return capitalize(LONG_DATE_FORMATTER.format(parseDateKey(key)))
 }
 
+function formatDayMonth(key: DateKey): string {
+  return DAY_MONTH_FORMATTER.format(parseDateKey(key)).replace(",", "")
+}
+
+function daySchedule(key: DateKey): SlotGroup[] {
+  const day = parseDateKey(key).getUTCDate()
+  const toSlot = (time: string) => ({
+    time,
+    taken: (day + DAY_SLOTS.indexOf(time)) % 3 === 0,
+  })
+
+  return [
+    { label: "Turno Mañana (09:00 - 13:00 hs)", slots: MORNING_SLOTS.map(toSlot) },
+    { label: "Turno Tarde (15:00 - 19:30 hs)", slots: AFTERNOON_SLOTS.map(toSlot) },
+  ]
+}
+
 export {
+  daySchedule,
+  formatDayMonth,
   formatLongDate,
   formatMonth,
   isSelectableDay,
@@ -110,4 +154,4 @@ export {
   shiftMonth,
   todayKey,
 }
-export type { DateKey, MonthCell, MonthRef }
+export type { DateKey, MonthCell, MonthRef, SlotGroup }

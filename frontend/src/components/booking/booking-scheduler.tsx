@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { BookingCalendar } from "@/components/booking/booking-calendar"
+import { BookingSlots } from "@/components/booking/booking-slots"
 import type { DateKey } from "@/lib/booking-availability"
 
 type BookingSchedulerProps = {
@@ -10,6 +11,12 @@ type BookingSchedulerProps = {
 
 function BookingScheduler({ today }: BookingSchedulerProps) {
   const [date, setDate] = useState<DateKey | null>(null)
+  const [time, setTime] = useState<string | null>(null)
+
+  function selectDate(next: DateKey) {
+    setDate(next)
+    setTime(null)
+  }
 
   return (
     <section className="rounded-xl bg-card p-md shadow-card md:p-lg">
@@ -27,7 +34,11 @@ function BookingScheduler({ today }: BookingSchedulerProps) {
         </div>
       </div>
 
-      <BookingCalendar today={today} value={date} onChange={setDate} />
+      <BookingCalendar today={today} value={date} onChange={selectDate} />
+
+      {date ? (
+        <BookingSlots date={date} value={time} onChange={setTime} />
+      ) : null}
     </section>
   )
 }
