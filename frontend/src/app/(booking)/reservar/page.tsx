@@ -29,7 +29,7 @@ async function BookingContent({
   return (
     <>
       <ProfessionalSummary professional={professional} />
-      <BookingScheduler today={todayKey()} />
+      <BookingScheduler today={todayKey()} professional={professional} />
     </>
   )
 }

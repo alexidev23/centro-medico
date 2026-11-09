@@ -1,7 +1,7 @@
 # Stage B2 — Calendar and slot selection
 
 **Branch:** `feat/booking-calendar`
-**Status:** B2a, B2b and B2c implemented, B2d pending
+**Status:** B2a, B2b, B2c and B2d implemented
 **Depends on:** `main` at `236c827` (B1b)
 
 ## Objective
@@ -135,11 +135,23 @@ noviembre"*: `formatDayMonth` keeps the weekday lowercase and drops the year, wh
 calendar already shows. `BookingScheduler` gains `selectedTime` and resets it when the date
 changes.
 
-## Specification — B2d (after B2c)
+## Specification — B2d (implemented)
 
-`BookingSummary` shows the doctor snapshot, the formatted date, the time with a *Mañana* /
-*Tarde* tag, and the office with the app's address. Coverage, patient and price wait for
-B3/B4. Below `lg` the summary stacks after the slots, not sticky.
+The scheduler lays out the 12-column grid: the step 2 card in `lg:col-span-8`, the summary in
+`lg:col-span-4` with `lg:sticky lg:top-24` (the site header is fixed at 80px from `md`). Below
+`lg` the summary stacks after the card, not sticky. `BookingScheduler` receives the
+`professional` and renders `BookingSummary` with the picked `date` and `time`.
+
+`BookingSummary` is the export's right column, trimmed to what B2 knows:
+`rounded-xl bg-card p-md shadow-card md:p-lg`, header with the primary dot and *"Resumen en
+vivo"* in `text-label-sm font-bold uppercase tracking-widest text-primary` plus a state chip
+(*"Paso 2 en curso"* / *"Paso 2 listo"*), `h3` *"Tu reserva de turno"*, the doctor snapshot on
+`bg-background` (48px photo, name, specialty, licence), and a `dl` of three rows with a
+`size-8` icon tile: *"Fecha asignada"* (`formatLongDate`), *"Horario puntual"* (*"09:00 hs"* in
+`text-headline-sm` with a *Mañana* / *"Tarde"* tag derived from the hour), and *"Sede y
+consultorio"* (`professional.office` plus *"Av. Hipólito Yrigoyen 480, Nueva Córdoba,
+Córdoba"*). Unpicked values read *"Elegí una fecha"* / *"Elegí un horario"* in
+`text-placeholder`. Coverage, patient and price wait for B3/B4.
 
 ## Acceptance criteria — B2a
 
@@ -171,3 +183,15 @@ B3/B4. Below `lg` the summary stacks after the slots, not sticky.
 - Taken slots are `disabled` and struck; picking a free slot marks exactly one
   (`aria-pressed="true"`); picking another day clears the time.
 - CDP probe at 320 / 390 / 768 / 1280 with `mobile:false`: no overflow, empty console.
+
+## Acceptance criteria — B2d
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/reservar` stays Partial
+  Prerender.
+- From `lg` up the summary sits in the fourth-quarter column, sticky at `top-24`; below `lg`
+  it stacks after the step 2 card.
+- Before picking, the summary reads *"Elegí una fecha"* / *"Elegí un horario"* and the chip
+  reads *"Paso 2 en curso"*; after picking both, the chip reads *"Paso 2 listo"*.
+- The summary repeats the doctor, the long date, *"09:00 hs"* with the *Mañana* tag,
+  *"Consultorio 3"* and the app's address.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no overflow, empty console.
