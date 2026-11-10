@@ -379,6 +379,7 @@ P6 was planned in two stages of about 215 lines. It ships in three, because the 
 | P6-ii | `frontend/src/components/secretary/patient-directory.tsx` | The table |
 | P6-ii | `frontend/src/app/(panel)/pacientes/page.tsx` | The route |
 | P6-ii | `frontend/src/components/secretary/panel-sidebar.tsx` | `Pacientes` enabled |
+| P6-iii | `frontend/src/components/secretary/patient-directory.tsx` | Search field, coverage chips and the "con turno" chip |
 
 ## Specification — P6-i
 
@@ -431,3 +432,31 @@ it (P7) would do nothing. The export's `#HC` is not a concept here, so the searc
 - The `Contacto` column appears only at `xl` and up.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; the table scrolls inside its
   own container on phones, where 40rem does not fit. Console clean.
+
+## Specification — P6-iii
+
+**The search promises exactly what it can do.** Name, DNI and phone. The export's placeholder also
+offers `#HC`, a record number this system does not have, so the field does not mention it. Matching
+ignores accents and case, and compares phone and DNI by their digits, so `caceres` finds *Cáceres*
+and `3516113094` finds *351 611-3094*.
+
+**Two controls, independent.** The coverage chips pick one provider; the "Con turno próximo" chip is
+a toggle that can be on at the same time. Their combination is an AND, and a combination that
+matches nobody says so, with the wording the turnos table already uses, instead of leaving an empty
+table under a bold header.
+
+**The counter tells the truth.** With any filter on, the badge reads `3 de 9 pacientes` instead of
+the total, so the number next to the title never contradicts what is on screen.
+
+**The table stays where it is.** The filters render above it, so no row, cell or class is
+re-indented: the stage is additions, not churn. It is the same lesson P5 learned the expensive way.
+
+## Acceptance criteria — P6-iii
+
+- `caceres` and `cáceres` each return Bruno Cáceres; `28.442` returns Ana Lucero; `351 611` returns
+  Bruno Cáceres.
+- `OSDE` returns two rows, `Particular` three, and "Con turno próximo" eight.
+- `Irene` plus "Con turno próximo" shows the empty message and no rows.
+- The clear button appears only with text, empties the field and restores the nine rows.
+- Clearing the chips restores the nine rows and the `9 pacientes` badge.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
