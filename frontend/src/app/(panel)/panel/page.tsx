@@ -3,7 +3,8 @@ import { Suspense } from "react"
 import { connection } from "next/server"
 import { CalendarCheck, CalendarX, Hourglass, UserCheck } from "lucide-react"
 import { KpiCard } from "@/components/secretary/kpi-card"
-import { resumenDelDia } from "@/lib/secretary/demo-data"
+import { TodayTurnos } from "@/components/secretary/today-turnos"
+import { resumenDelDia, turnosDelDia } from "@/lib/secretary/demo-data"
 
 export const metadata: Metadata = {
   title: "Panel de secretaría · Centro Médico Aurora",
@@ -79,6 +80,9 @@ export default function PanelPage() {
       </Suspense>
       <div className="mt-lg">
         <DashboardStats />
+      </div>
+      <div className="mt-lg">
+        <TodayTurnos turnos={turnosDelDia()} />
       </div>
     </div>
   )

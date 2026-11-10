@@ -84,3 +84,32 @@ export function resumenDelDia(): ResumenDelDia {
     ultimaHora: turnos[turnos.length - 1]?.hora ?? "—",
   }
 }
+
+export type TurnoDelDia = Turno & {
+  paciente: Paciente
+  profesional: Profesional
+}
+
+export function consultorioCorto(consultorio: string) {
+  return consultorio.replace("Consultorio ", "Cons. ")
+}
+
+const pacientePorId = new Map(
+  pacientes.map((paciente) => [paciente.id, paciente] as const),
+)
+const profesionalPorId = new Map(
+  profesionales.map((profesional) => [profesional.id, profesional] as const),
+)
+
+export function turnosDelDia(): TurnoDelDia[] {
+  return turnos.map((turno) => {
+    const paciente = pacientePorId.get(turno.pacienteId)
+    const profesional = profesionalPorId.get(turno.profesionalId)
+
+    if (!paciente || !profesional) {
+      throw new Error(`Turno ${turno.id} points to a missing id`)
+    }
+
+    return { ...turno, paciente, profesional }
+  })
+}

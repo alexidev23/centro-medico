@@ -1,7 +1,7 @@
 # Stage P — Secretary panel
 
 **Branch:** `feat/secretary-panel`
-**Status:** P1 shipped (`1623322`), P2 in progress
+**Status:** P1 shipped (`1623322`), P2 shipped (`5b6da8f`), P3 planned
 **Depends on:** `main` at `c8219a1` (B5c)
 
 ## Objective
@@ -159,3 +159,52 @@ anterior"* needs a month of history that no fixture has; `Atendidos` replaces it
 - The grid is one column at 320, two from `sm` and four from `xl`, with no horizontal overflow.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: the four cards are visible, the
   console is empty and the document never scrolls sideways.
+
+## Scope — P3
+
+| File | Change |
+| --- | --- |
+| `frontend/src/lib/secretary/demo-data.ts` | `turnosDelDia()` — joins each turno with its patient and professional |
+| `frontend/src/components/secretary/status-badge.tsx` | New — the five states as one pill |
+| `frontend/src/components/secretary/today-turnos.tsx` | New — client component: title, filter tabs and the table |
+| `frontend/src/app/(panel)/panel/page.tsx` | Mounts the table under the cards |
+
+## Specification — P3
+
+**The filters count what they filter.** *Todos*, *Mañana*, *Tarde*, *En sala* and *Atendidos* carry
+their counts in the label, computed from the dataset like the cards: 12 / 8 / 4 / 1 / 4. *Mañana*
+is before 12:00 and *Tarde* from 12:00; the other two are states. One `matchers` record maps each
+tab to its predicate, so the label count and the rows always come from the same rule.
+
+**Rows.** `Horario` (bold) with the consultorio underneath, `Paciente` with an initials circle,
+name and document, `Profesional & Especialidad`, `Cobertura` as a neutral chip and `Estado` as a
+pill. The initials are computed from the name; nothing is typed twice.
+
+**No `Acciones` column.** The design's *Marcar Presente*, *Llamar a sala* and *Editar* all end in an
+`alert()` over nothing. A table with no buttons is the honest version and the column simply is not
+there.
+
+**The chart does not ship.** Beside the table the export draws an occupancy donut with *"82%
+ocupación"*. There is no schedule behind it, so the table takes the full width instead.
+
+**Scroll inside the card.** The table keeps `min-w-[36rem]` inside `overflow-x-auto`, as in the
+design, so the page itself never scrolls sideways on a phone; the card clips the table. Below `xl`
+the `Cobertura` column is dropped — the panel sidebar eats 17rem, so five columns do not fit on a
+laptop — and the tabs sit under the title instead of beside it, because side by side they clipped
+the last tab. Both come back at `xl`. The consultorio reads *"Cons. 2"*, as in the export.
+
+**Empty state.** If a filter matches nothing the body shows one row with *"No hay turnos con este
+filtro."* instead of an empty table.
+
+## Acceptance criteria — P3
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0.
+- The five tabs show 12 / 8 / 4 / 1 / 4 and the rendered row count equals the count in the active
+  tab's label for every tab.
+- No row contains a button, a link or an `onclick`: the only interactive elements are the tabs.
+- Every row shows a state pill whose text matches the turno's state, in the token colour for that
+  state.
+- At 320 and 390 the table scrolls inside its card and `document.scrollWidth` still equals the
+  viewport; 768, 1024 and 1280 have no inner scroll, and `Cobertura` only appears from 1280.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: console empty, and clicking each
+  tab changes the visible row count to the label's number.
