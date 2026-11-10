@@ -4,7 +4,12 @@ import { connection } from "next/server"
 import { CalendarCheck, CalendarX, Hourglass, UserCheck } from "lucide-react"
 import { KpiCard } from "@/components/secretary/kpi-card"
 import { TodayTurnos } from "@/components/secretary/today-turnos"
-import { resumenDelDia, turnosDelDia } from "@/lib/secretary/demo-data"
+import {
+  diaDeLaSemana,
+  resumenDelDia,
+  turnosDelDia,
+  type DiaSemana,
+} from "@/lib/secretary/demo-data"
 
 export const metadata: Metadata = {
   title: "Panel de secretaría · Centro Médico Aurora",
@@ -17,13 +22,11 @@ const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   year: "numeric",
 })
 
-async function DashboardHead() {
-  await connection()
-
+function DashboardHead({ fecha }: { fecha: Date }) {
   return (
     <>
       <p className="text-label-sm font-semibold tracking-wide text-fg-secondary uppercase">
-        {dateFormatter.format(new Date())} · Nueva Córdoba
+        {dateFormatter.format(fecha)} · Nueva Córdoba
       </p>
       <h1 className="mt-1 text-headline-lg font-bold tracking-tight text-foreground">
         Buen día
@@ -36,8 +39,8 @@ async function DashboardHead() {
   )
 }
 
-function DashboardStats() {
-  const resumen = resumenDelDia()
+function DashboardStats({ dia }: { dia: DiaSemana }) {
+  const resumen = resumenDelDia(dia)
 
   return (
     <div className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
@@ -72,18 +75,39 @@ function DashboardStats() {
   )
 }
 
+async function PanelDashboard() {
+  await connection()
+
+  const fecha = new Date()
+  const dia = diaDeLaSemana(fecha)
+
+  return (
+    <>
+      <DashboardHead fecha={fecha} />
+      {dia ? (
+        <>
+          <div className="mt-lg">
+            <DashboardStats dia={dia} />
+          </div>
+          <div className="mt-lg">
+            <TodayTurnos turnos={turnosDelDia(dia)} />
+          </div>
+        </>
+      ) : (
+        <p className="mt-lg rounded-xl border border-surface-subtle bg-card p-lg text-body-md text-fg-secondary shadow-card">
+          La sede no atiende los domingos.
+        </p>
+      )}
+    </>
+  )
+}
+
 export default function PanelPage() {
   return (
     <div className="flex max-w-[80rem] flex-col">
       <Suspense fallback={<p className="h-4" />}>
-        <DashboardHead />
+        <PanelDashboard />
       </Suspense>
-      <div className="mt-lg">
-        <DashboardStats />
-      </div>
-      <div className="mt-lg">
-        <TodayTurnos turnos={turnosDelDia()} />
-      </div>
     </div>
   )
 }

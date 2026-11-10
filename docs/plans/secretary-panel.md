@@ -53,7 +53,8 @@ screen, so the dashboard, the agenda and the directory cannot disagree about a p
 | **P1** | `(panel)` shell with sidebar and top bar, `/panel` head, date line | ~180 |
 | **P2** | Fixture module, derivations and the four KPI cards | ~155 |
 | **P3** | Turnos table with status badges and the five filter tabs | ~165 |
-| **P4** | Agenda toolbar and the weekly grid | ~170 |
+| **P4a** | Week-wide fixtures: `dia` and `motivo`, dashboard reads the request weekday | ~95 |
+| **P4b** | `/agenda` with the week label, six day columns and the turnos placed by hour | ~150 |
 | **P5** | Agenda filters: professional, specialty, room and legend | ~90 |
 | **P6** | Patient directory with search and coverage chips | ~180 |
 | **P7** | Patient record: header, actions and the Historial / Datos tabs | ~170 |
@@ -208,3 +209,44 @@ filtro."* instead of an empty table.
   viewport; 768, 1024 and 1280 have no inner scroll, and `Cobertura` only appears from 1280.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: console empty, and clicking each
   tab changes the visible row count to the label's number.
+
+## Scope — P4a
+
+The agenda forces a data decision first. Today's fixtures are a single day, but the grid is a week,
+and the panel cannot show "12 turnos de hoy" while a week grid contradicts it. So the dataset
+becomes a week, and "today" stops being a constant.
+
+| File | Change |
+| --- | --- |
+| `frontend/src/lib/secretary/demo-data.ts` | `dia` and `motivo` on every turno, six days of fixtures, helpers that take the day |
+| `frontend/src/app/(panel)/panel/page.tsx` | Reads the weekday at request time and moves the cards and the table inside the boundary |
+
+## Specification — P4a
+
+**One week, keyed by weekday.** `Turno` gains `dia` (`lun` … `sab`) and `motivo` (*"Control anual"*,
+*"Primera consulta"*). Monday keeps the twelve turnos the dashboard already shows; the other five
+days carry four or five each. Nothing else in the shape changes: the ids, the patients and the
+professionals are the same ones.
+
+**"Hoy" is the request's weekday.** `diaDeLaSemana` maps the date to the fixture key, with `null`
+on Sunday. `turnosDelDia(dia)` and `resumenDelDia(dia)` filter the one list, so the cards and the
+table still count what the agenda draws, on whichever day the panel is opened.
+
+**Consequence to accept.** The dashboard counters vary with the weekday, and on a Sunday they are
+zero. That is the honest behaviour of a demo dataset, and the screen says so: the subtitle already
+states there is no backend, and Sunday gets *"La sede no atiende los domingos."* in place of the
+tables.
+
+**Streaming, not prerendering.** The cards and the table depend on the request date now, so they
+move inside the `Suspense` boundary the date line already uses. `/panel` stays a partial prerender.
+
+## Acceptance criteria — P4a
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/panel` still builds as a partial
+  prerender.
+- On the current weekday the four cards and the table show that day's turnos: 12 on Monday, and the
+  count of the other days matches their fixtures.
+- Changing a fixture's `dia` moves the turno to the other day and out of today's count.
+- No screen contains a second, parallel list of turnos: the dashboard and the agenda both call the
+  same helpers.
+- Sunday renders the closed message and no card with an invented number.

@@ -19,9 +19,13 @@ export type Paciente = {
   cobertura: string
 }
 
+export type DiaSemana = "lun" | "mar" | "mie" | "jue" | "vie" | "sab"
+
 export type Turno = {
   id: string
   hora: string
+  dia: DiaSemana
+  motivo: string
   pacienteId: string
   profesionalId: string
   estado: TurnoEstado
@@ -48,19 +52,56 @@ export const pacientes: Paciente[] = [
 ]
 
 export const turnos: Turno[] = [
-  { id: "tu-1", hora: "08:00", pacienteId: "pa-1", profesionalId: "pr-1", estado: "atendido" },
-  { id: "tu-2", hora: "08:30", pacienteId: "pa-2", profesionalId: "pr-2", estado: "atendido" },
-  { id: "tu-3", hora: "09:00", pacienteId: "pa-3", profesionalId: "pr-3", estado: "atendido" },
-  { id: "tu-4", hora: "09:30", pacienteId: "pa-4", profesionalId: "pr-4", estado: "cancelado" },
-  { id: "tu-5", hora: "10:00", pacienteId: "pa-5", profesionalId: "pr-1", estado: "atendido" },
-  { id: "tu-6", hora: "10:30", pacienteId: "pa-6", profesionalId: "pr-5", estado: "en-sala" },
-  { id: "tu-7", hora: "11:00", pacienteId: "pa-7", profesionalId: "pr-6", estado: "confirmado" },
-  { id: "tu-8", hora: "11:30", pacienteId: "pa-8", profesionalId: "pr-2", estado: "confirmado" },
-  { id: "tu-9", hora: "12:00", pacienteId: "pa-1", profesionalId: "pr-3", estado: "pendiente" },
-  { id: "tu-10", hora: "15:00", pacienteId: "pa-2", profesionalId: "pr-4", estado: "pendiente" },
-  { id: "tu-11", hora: "16:00", pacienteId: "pa-3", profesionalId: "pr-5", estado: "pendiente" },
-  { id: "tu-12", hora: "17:30", pacienteId: "pa-4", profesionalId: "pr-6", estado: "cancelado" },
+  { id: "tu-1", hora: "08:00", dia: "lun", motivo: "Control anual", pacienteId: "pa-1", profesionalId: "pr-1", estado: "atendido" },
+  { id: "tu-2", hora: "08:30", dia: "lun", motivo: "Primera consulta", pacienteId: "pa-2", profesionalId: "pr-2", estado: "atendido" },
+  { id: "tu-3", hora: "09:00", dia: "lun", motivo: "Control anual", pacienteId: "pa-3", profesionalId: "pr-3", estado: "atendido" },
+  { id: "tu-4", hora: "09:30", dia: "lun", motivo: "Primera consulta", pacienteId: "pa-4", profesionalId: "pr-4", estado: "cancelado" },
+  { id: "tu-5", hora: "10:00", dia: "lun", motivo: "Control anual", pacienteId: "pa-5", profesionalId: "pr-1", estado: "atendido" },
+  { id: "tu-6", hora: "10:30", dia: "lun", motivo: "Control anual", pacienteId: "pa-6", profesionalId: "pr-5", estado: "en-sala" },
+  { id: "tu-7", hora: "11:00", dia: "lun", motivo: "Primera consulta", pacienteId: "pa-7", profesionalId: "pr-6", estado: "confirmado" },
+  { id: "tu-8", hora: "11:30", dia: "lun", motivo: "Control anual", pacienteId: "pa-8", profesionalId: "pr-2", estado: "confirmado" },
+  { id: "tu-9", hora: "12:00", dia: "lun", motivo: "Primera consulta", pacienteId: "pa-1", profesionalId: "pr-3", estado: "pendiente" },
+  { id: "tu-10", hora: "15:00", dia: "lun", motivo: "Control anual", pacienteId: "pa-2", profesionalId: "pr-4", estado: "pendiente" },
+  { id: "tu-11", hora: "16:00", dia: "lun", motivo: "Control anual", pacienteId: "pa-3", profesionalId: "pr-5", estado: "pendiente" },
+  { id: "tu-12", hora: "17:30", dia: "lun", motivo: "Primera consulta", pacienteId: "pa-4", profesionalId: "pr-6", estado: "cancelado" },
+  { id: "tu-13", hora: "08:00", dia: "mar", motivo: "Control anual", pacienteId: "pa-5", profesionalId: "pr-3", estado: "atendido" },
+  { id: "tu-14", hora: "09:00", dia: "mar", motivo: "Control anual", pacienteId: "pa-6", profesionalId: "pr-2", estado: "atendido" },
+  { id: "tu-15", hora: "10:00", dia: "mar", motivo: "Primera consulta", pacienteId: "pa-7", profesionalId: "pr-1", estado: "en-sala" },
+  { id: "tu-16", hora: "11:00", dia: "mar", motivo: "Control anual", pacienteId: "pa-8", profesionalId: "pr-4", estado: "confirmado" },
+  { id: "tu-17", hora: "12:00", dia: "mar", motivo: "Primera consulta", pacienteId: "pa-1", profesionalId: "pr-5", estado: "pendiente" },
+  { id: "tu-18", hora: "08:30", dia: "mie", motivo: "Control anual", pacienteId: "pa-2", profesionalId: "pr-6", estado: "atendido" },
+  { id: "tu-19", hora: "09:30", dia: "mie", motivo: "Primera consulta", pacienteId: "pa-3", profesionalId: "pr-4", estado: "cancelado" },
+  { id: "tu-20", hora: "11:00", dia: "mie", motivo: "Control anual", pacienteId: "pa-4", profesionalId: "pr-2", estado: "confirmado" },
+  { id: "tu-21", hora: "12:30", dia: "mie", motivo: "Primera consulta", pacienteId: "pa-5", profesionalId: "pr-6", estado: "pendiente" },
+  { id: "tu-22", hora: "08:00", dia: "jue", motivo: "Control anual", pacienteId: "pa-6", profesionalId: "pr-3", estado: "atendido" },
+  { id: "tu-23", hora: "09:00", dia: "jue", motivo: "Primera consulta", pacienteId: "pa-7", profesionalId: "pr-5", estado: "confirmado" },
+  { id: "tu-24", hora: "10:30", dia: "jue", motivo: "Control anual", pacienteId: "pa-8", profesionalId: "pr-1", estado: "en-sala" },
+  { id: "tu-25", hora: "12:30", dia: "jue", motivo: "Primera consulta", pacienteId: "pa-1", profesionalId: "pr-4", estado: "pendiente" },
+  { id: "tu-26", hora: "15:00", dia: "jue", motivo: "Control anual", pacienteId: "pa-2", profesionalId: "pr-2", estado: "pendiente" },
+  { id: "tu-27", hora: "09:00", dia: "vie", motivo: "Control anual", pacienteId: "pa-3", profesionalId: "pr-1", estado: "atendido" },
+  { id: "tu-28", hora: "10:00", dia: "vie", motivo: "Control anual", pacienteId: "pa-4", profesionalId: "pr-6", estado: "atendido" },
+  { id: "tu-29", hora: "11:30", dia: "vie", motivo: "Primera consulta", pacienteId: "pa-5", profesionalId: "pr-2", estado: "confirmado" },
+  { id: "tu-30", hora: "12:00", dia: "vie", motivo: "Primera consulta", pacienteId: "pa-6", profesionalId: "pr-5", estado: "cancelado" },
+  { id: "tu-31", hora: "09:00", dia: "sab", motivo: "Control anual", pacienteId: "pa-7", profesionalId: "pr-6", estado: "confirmado" },
+  { id: "tu-32", hora: "10:00", dia: "sab", motivo: "Primera consulta", pacienteId: "pa-8", profesionalId: "pr-3", estado: "pendiente" },
+  { id: "tu-33", hora: "11:00", dia: "sab", motivo: "Control anual", pacienteId: "pa-1", profesionalId: "pr-1", estado: "atendido" },
+  { id: "tu-34", hora: "12:00", dia: "sab", motivo: "Primera consulta", pacienteId: "pa-2", profesionalId: "pr-4", estado: "pendiente" },
 ]
+
+const diasPorIndice: (DiaSemana | null)[] = [
+  null,
+  "lun",
+  "mar",
+  "mie",
+  "jue",
+  "vie",
+  "sab",
+]
+
+/** Fixture key for a date; `null` on Sunday, when the sede is closed. */
+export function diaDeLaSemana(fecha: Date): DiaSemana | null {
+  return diasPorIndice[fecha.getDay()]
+}
 
 export type ResumenDelDia = {
   total: number
@@ -71,17 +112,18 @@ export type ResumenDelDia = {
   ultimaHora: string
 }
 
-export function resumenDelDia(): ResumenDelDia {
+export function resumenDelDia(dia: DiaSemana): ResumenDelDia {
+  const delDia = turnosDelDia(dia)
   const contar = (estado: TurnoEstado) =>
-    turnos.filter((turno) => turno.estado === estado).length
+    delDia.filter((turno) => turno.estado === estado).length
 
   return {
-    total: turnos.length,
+    total: delDia.length,
     pendientes: contar("pendiente"),
     cancelados: contar("cancelado"),
     atendidos: contar("atendido"),
-    primeraHora: turnos[0]?.hora ?? "—",
-    ultimaHora: turnos[turnos.length - 1]?.hora ?? "—",
+    primeraHora: delDia[0]?.hora ?? "—",
+    ultimaHora: delDia[delDia.length - 1]?.hora ?? "—",
   }
 }
 
@@ -101,15 +143,18 @@ const profesionalPorId = new Map(
   profesionales.map((profesional) => [profesional.id, profesional] as const),
 )
 
-export function turnosDelDia(): TurnoDelDia[] {
-  return turnos.map((turno) => {
-    const paciente = pacientePorId.get(turno.pacienteId)
-    const profesional = profesionalPorId.get(turno.profesionalId)
+export function turnosDelDia(dia: DiaSemana): TurnoDelDia[] {
+  return turnos
+    .filter((turno) => turno.dia === dia)
+    .sort((a, b) => a.hora.localeCompare(b.hora))
+    .map((turno) => {
+      const paciente = pacientePorId.get(turno.pacienteId)
+      const profesional = profesionalPorId.get(turno.profesionalId)
 
-    if (!paciente || !profesional) {
-      throw new Error(`Turno ${turno.id} points to a missing id`)
-    }
+      if (!paciente || !profesional) {
+        throw new Error(`Turno ${turno.id} points to a missing id`)
+      }
 
-    return { ...turno, paciente, profesional }
-  })
+      return { ...turno, paciente, profesional }
+    })
 }
