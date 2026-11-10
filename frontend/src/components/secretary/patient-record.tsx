@@ -4,6 +4,7 @@ import { useState } from "react"
 import { PatientDatos } from "@/components/secretary/patient-datos"
 import { PatientHistory } from "@/components/secretary/patient-history"
 import { PatientTabs, type TabDeLaFicha } from "@/components/secretary/patient-tabs"
+import { PatientWeek } from "@/components/secretary/patient-week"
 import { coberturaDe, type PacienteDelPadron } from "@/lib/secretary/demo-data"
 import { initials } from "@/lib/utils"
 
@@ -36,8 +37,14 @@ function PatientRecord({ paciente }: { paciente: PacienteDelPadron }) {
       <PatientTabs activo={tab} onCambiar={setTab} />
 
       {tab === "historial" ? (
-        <div role="tabpanel" id="panel-historial" aria-labelledby="tab-historial">
+        <div
+          role="tabpanel"
+          id="panel-historial"
+          aria-labelledby="tab-historial"
+          className="flex flex-col gap-md"
+        >
           <PatientHistory proximo={paciente.proximo} />
+          <PatientWeek paciente={paciente} />
         </div>
       ) : (
         <div role="tabpanel" id="panel-datos" aria-labelledby="tab-datos">

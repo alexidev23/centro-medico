@@ -239,6 +239,9 @@ function conPacienteYProfesional(turno: Turno): TurnoDelDia {
 }
 
 export type ProximoTurno = {
+  id: string
+  /** `YYYY-MM-DD`: the fixture repeats every week, so the id alone is not a date. */
+  fecha: string
   /** "Jue 12 nov, 16:00 hs" — what the directory table prints. */
   cuando: string
   profesional: string
@@ -251,8 +254,22 @@ export type ProximoTurno = {
   estado: TurnoEstado
 }
 
+/** One turno the patient has in the current week, outside the record's card. */
+export type TurnoDeLaSemana = {
+  id: string
+  /** `YYYY-MM-DD`, so two occurrences of a repeated turno never look alike. */
+  fecha: string
+  /** "Mar 10 nov, 12:00 hs" */
+  cuando: string
+  profesional: string
+  especialidad: string
+  motivo: string
+  estado: TurnoEstado
+}
+
 export type PacienteDelPadron = Paciente & {
   proximo: ProximoTurno | null
+  semana: TurnoDeLaSemana[]
   edad: number
   nacimientoTexto: string
 }
@@ -300,17 +317,46 @@ function fechaDelTurno(fecha: Date, enDias: number) {
  * "Lun 16 nov, 16:00 hs". Dates are formatted here, on the server, for the same
  * reason the agenda label is: the browser's timezone must not move a day.
  */
-function etiquetaDeTurno(fecha: Date, turno: TurnoDelDia, enDias: number) {
-  const diaYMes = diaYMesFormatter.format(fechaDelTurno(fecha, enDias)).replace(".", "")
+function etiquetaDeTurno(delDia: Date, turno: TurnoDelDia) {
+  const diaYMes = diaYMesFormatter.format(delDia).replace(".", "")
 
   return `${etiquetasDia[turno.dia]} ${diaYMes}, ${turno.hora} hs`
 }
 
 /** "Jueves 12 de noviembre": the long form the record card shows. */
-function fechaLarga(fecha: Date, enDias: number) {
-  const texto = fechaLargaFormatter.format(fechaDelTurno(fecha, enDias))
+function fechaLarga(delDia: Date) {
+  const texto = fechaLargaFormatter.format(delDia)
 
   return `${texto[0].toUpperCase()}${texto.slice(1).replace(",", "")}`
+}
+
+/** `YYYY-MM-DD`: the key that separates two occurrences of the same turno. */
+function fechaIso(delDia: Date) {
+  const mes = String(delDia.getMonth() + 1).padStart(2, "0")
+  const dia = String(delDia.getDate()).padStart(2, "0")
+
+  return `${delDia.getFullYear()}-${mes}-${dia}`
+}
+
+/**
+ * Every turno the patient has in the current week, in day and hour order. The
+ * dates come from the real calendar, so a row can never disagree with the
+ * agenda about what day a turno falls on.
+ */
+function semanaDelPaciente(pacienteId: string, fecha: Date): TurnoDeLaSemana[] {
+  return fechasDeLaSemana(fecha).flatMap(({ dia, fecha: delDia }) =>
+    turnosDelDia(dia)
+      .filter((turno) => turno.pacienteId === pacienteId)
+      .map((turno) => ({
+        id: turno.id,
+        fecha: fechaIso(delDia),
+        cuando: etiquetaDeTurno(delDia, turno),
+        profesional: turno.profesional.nombre,
+        especialidad: turno.profesional.especialidad,
+        motivo: turno.motivo,
+        estado: turno.estado,
+      })),
+  )
 }
 
 /**
@@ -333,6 +379,7 @@ export function pacientesDelPadron(fecha: Date): PacienteDelPadron[] {
       paciente.nacimiento,
       fecha,
     )
+    const semana = semanaDelPaciente(paciente.id, fecha)
 
     for (let paso = 0; paso < diasDeLaSemana.length; paso += 1) {
       const indice = (desde + paso) % diasDeLaSemana.length
@@ -343,15 +390,19 @@ export function pacientesDelPadron(fecha: Date): PacienteDelPadron[] {
 
       if (turno) {
         const enDias = (indice + 1 - diaDeHoy + 7) % 7
+        const delDia = fechaDelTurno(fecha, enDias)
 
         return {
           ...paciente,
           edad,
           nacimientoTexto,
+          semana,
           proximo: {
-            cuando: etiquetaDeTurno(fecha, turno, enDias),
+            id: turno.id,
+            fecha: fechaIso(delDia),
+            cuando: etiquetaDeTurno(delDia, turno),
             profesional: turno.profesional.nombre,
-            dia: fechaLarga(fecha, enDias),
+            dia: fechaLarga(delDia),
             hora: `${turno.hora} hs`,
             especialidad: turno.profesional.especialidad,
             consultorio: turno.profesional.consultorio,
@@ -362,6 +413,6 @@ export function pacientesDelPadron(fecha: Date): PacienteDelPadron[] {
       }
     }
 
-    return { ...paciente, edad, nacimientoTexto, proximo: null }
+    return { ...paciente, edad, nacimientoTexto, semana, proximo: null }
   })
 }

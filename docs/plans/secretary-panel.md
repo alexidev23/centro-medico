@@ -617,3 +617,40 @@ identity card, inventing clinical data is worse than omitting it.
   then `[-1,0]`.
 - Switching patient while on Datos returns to Historial and the card shows the new patient.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P7-iv
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P7-iv | `frontend/src/lib/secretary/demo-data.ts` | `semana` on the patient; `fechaIso()`; two formatters take a date |
+| P7-iv | `frontend/src/components/secretary/patient-week.tsx` | The list under the card |
+| P7-iv | `frontend/src/components/secretary/patient-record.tsx` | Mounts the list beside the card |
+
+## Specification — P7-iv
+
+**The design's "Turnos Anteriores" is not built.** That list carries 2024 dates that exist nowhere in
+the fixtures, and inventing a clinical history is worse than omitting it. What does exist is the
+patient's own week, so that is what the panel shows, titled "Turnos de la semana".
+
+**One derivation, real dates.** `semanaDelPaciente()` walks `fechasDeLaSemana(fecha)`, so every row's
+date comes from the calendar rather than from a second, parallel count of days. `etiquetaDeTurno()`
+and `fechaLarga()` now take the date itself, which removed the offset parameter they shared.
+
+**The card's turno is not repeated.** The list drops the entry the card already shows. The match is
+id **and** date: the fixtures repeat one week, so next week's Monday 16:00 and this week's Monday
+16:00 share `tu-11`; matching on the id alone deleted a real row for Carla and Facundo.
+
+**Emptiness stays honest.** A patient with no turnos at all (Irene Salas) gets only the card's message,
+no empty list. A patient whose only week turno is the one on the card reads "No hay otros turnos esta
+semana."
+
+## Acceptance criteria — P7-iv
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/pacientes` is a partial prerender.
+- For each of the eight patients with turnos, the rows read exactly the expected week:
+  Ana `Lun 9 nov, 08:00 hs` / `Lun 9 nov, 12:00 hs` / `Jue 12 nov, 12:30 hs` / `Sáb 14 nov, 11:00 hs`;
+  Bruno four; Carla four, including `Lun 9 nov, 16:00 hs` — the same fixture row her card announces a
+  week later; Diego, Elena, Gabriela and Hernán three; Facundo four.
+- Every row carries the professional and a real state pill.
+- Irene Salas shows no list and no list heading.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
