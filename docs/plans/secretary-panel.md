@@ -665,7 +665,8 @@ each stage stays reviewable:
 | Stage | Content |
 | --- | --- |
 | P8-i | Route, header, the three real numbers, sidebar enabled |
-| P8-ii | The card grid |
+| P8-ii | The card grid: identity, room and state |
+| P8-ii-b | The professional's week on the card |
 | P8-iii | Search and specialty chips |
 | P8-iv | Physical distribution of the consultorios |
 
@@ -709,4 +710,52 @@ exists, so it becomes a link and marks itself with `aria-current="page"`.
 - The sidebar renders exactly one `a[href="/profesionales"]`, with `aria-current="page"`, and leaves no
   `aria-disabled` section behind.
 - No "Registrar profesional" anywhere in the served HTML.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P8-ii
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P8-ii | `frontend/src/lib/secretary/demo-data.ts` | `Planta`, `Consultorio` and the `consultorios` fixture; `matricula` and `duracion` on `Profesional`; `cuerpoProfesional()` |
+| P8-ii | `frontend/src/components/secretary/professional-card.tsx` | The card |
+| P8-ii | `frontend/src/app/(panel)/profesionales/page.tsx` | The grid, under the KPI cards |
+
+## Specification — P8-ii
+
+**The split, reported.** The approved stage carried the card *and* the professional's week and
+measured 208 hand-authored lines, eight over the cap. Nothing was shaved to fit: the week moves to
+**P8-ii-b**, and the derivation and markup it needs move with it, so this stage lands at 171. The
+card here is the identity and the room: initials, state, name, M.P., specialty, consultorio with its
+planta, and the standard duration.
+
+**No photos, so initials.** The design draws portraits; there are no assets. A square with the
+professional's initials takes their place, and `inicialesDelProfesional()` strips the title first, so
+"Dra. Lucía Ferrero" reads `LF`, not `DL`.
+
+**The state pill is derived without a clock.** The design shows "Atendiendo en consultorio" and
+"Próximo turno en 15 min". The first becomes "Con paciente en sala": it is true when today's agenda
+has a turno in `en-sala`. The second is dropped, because it needs a live clock and would change
+while being read. A professional with any other turno today reads "Con turnos hoy"; with none, "Sin
+turnos hoy". Today that is one in sala, four with turnos and one without.
+
+**The planta belongs to the room.** `consultorios` holds nombre and planta (Baja: 1, 2, 5; Alta: 3, 4,
+6), and the card looks its professional's room up. `cuerpoProfesional()` returns `planta: null` when
+the room is missing from that list instead of guessing a floor. P8-iv reuses the same fixture.
+
+**The new fixture fields are plain data.** M.P. is invented and plausible, and never contacts anyone;
+the standard duration is 20, 30 or 45 minutes by specialty. Both are fixture fields, not derived
+from anything the fixtures do not know.
+
+**Out of scope.** "Ver agenda completa" would open a filtered agenda that does not exist yet, and
+"Bloquear horario" and "Disponibilidad" write. None of the three is built.
+
+## Acceptance criteria — P8-ii
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/profesionales` is a partial prerender.
+- Six cards, in fixture order, each carrying its initials, M.P., specialty, consultorio with planta,
+  and duration.
+- Pills: Dra. Ferrero "Con paciente en sala"; Salguero, Iturbe, Paz and Ledesma "Con turnos hoy";
+  Quiroga "Sin turnos hoy".
+- First card reads `LF`, `M.P. 34.892`, `Clínica médica`, `Consultorio 2 (Planta Baja)`, `30 min`.
+- No card shows an hour range yet: the week is P8-ii-b.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.

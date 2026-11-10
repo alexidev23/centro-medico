@@ -5,11 +5,22 @@ export type TurnoEstado =
   | "atendido"
   | "cancelado"
 
+export type Planta = "Baja" | "Alta"
+
+export type Consultorio = {
+  nombre: string
+  planta: Planta
+}
+
 export type Profesional = {
   id: string
   nombre: string
   especialidad: string
   consultorio: string
+  /** Provincial licence number, without the "M.P." prefix. */
+  matricula: string
+  /** Standard appointment length, in minutes. */
+  duracion: number
 }
 
 export type Paciente = {
@@ -36,13 +47,23 @@ export type Turno = {
   estado: TurnoEstado
 }
 
+/** The sede's rooms. The planta belongs to the room, not to the professional. */
+export const consultorios: Consultorio[] = [
+  { nombre: "Consultorio 1", planta: "Baja" },
+  { nombre: "Consultorio 2", planta: "Baja" },
+  { nombre: "Consultorio 3", planta: "Alta" },
+  { nombre: "Consultorio 4", planta: "Alta" },
+  { nombre: "Consultorio 5", planta: "Baja" },
+  { nombre: "Consultorio 6", planta: "Alta" },
+]
+
 export const profesionales: Profesional[] = [
-  { id: "pr-1", nombre: "Dra. Lucía Ferrero", especialidad: "Clínica médica", consultorio: "Consultorio 2" },
-  { id: "pr-2", nombre: "Dr. Martín Salguero", especialidad: "Cardiología", consultorio: "Consultorio 4" },
-  { id: "pr-3", nombre: "Dra. Paula Iturbe", especialidad: "Pediatría", consultorio: "Consultorio 1" },
-  { id: "pr-4", nombre: "Dr. Ignacio Paz", especialidad: "Dermatología", consultorio: "Consultorio 3" },
-  { id: "pr-5", nombre: "Dra. Sofía Ledesma", especialidad: "Ginecología", consultorio: "Consultorio 5" },
-  { id: "pr-6", nombre: "Dr. Emilio Quiroga", especialidad: "Traumatología", consultorio: "Consultorio 6" },
+  { id: "pr-1", nombre: "Dra. Lucía Ferrero", especialidad: "Clínica médica", consultorio: "Consultorio 2", matricula: "34.892", duracion: 30 },
+  { id: "pr-2", nombre: "Dr. Martín Salguero", especialidad: "Cardiología", consultorio: "Consultorio 4", matricula: "28.140", duracion: 30 },
+  { id: "pr-3", nombre: "Dra. Paula Iturbe", especialidad: "Pediatría", consultorio: "Consultorio 1", matricula: "41.502", duracion: 20 },
+  { id: "pr-4", nombre: "Dr. Ignacio Paz", especialidad: "Dermatología", consultorio: "Consultorio 3", matricula: "19.831", duracion: 30 },
+  { id: "pr-5", nombre: "Dra. Sofía Ledesma", especialidad: "Ginecología", consultorio: "Consultorio 5", matricula: "36.904", duracion: 30 },
+  { id: "pr-6", nombre: "Dr. Emilio Quiroga", especialidad: "Traumatología", consultorio: "Consultorio 6", matricula: "22.415", duracion: 45 },
 ]
 
 export const pacientes: Paciente[] = [
@@ -445,5 +466,43 @@ export function pacientesDelPadron(fecha: Date): PacienteDelPadron[] {
     }
 
     return { ...paciente, edad, nacimientoTexto, semana, proximo: null }
+  })
+}
+
+export type EstadoDelProfesional = "en-sala" | "con-turnos" | "sin-turnos"
+
+export type ProfesionalDelCuerpo = Profesional & {
+  /** `null` when the room is not in the sede's list; never a guessed floor. */
+  planta: Planta | null
+  estado: EstadoDelProfesional
+}
+
+const plantaPorConsultorio = new Map(
+  consultorios.map(({ nombre, planta }) => [nombre, planta] as const),
+)
+
+/**
+ * The staff grid: every professional with the floor of their room and the state
+ * of today's agenda, read from the same fixtures the agenda below already uses.
+ */
+export function cuerpoProfesional(fecha: Date): ProfesionalDelCuerpo[] {
+  const dia = diaDeLaSemana(fecha)
+  const deHoy = dia === null ? [] : turnosDelDia(dia)
+
+  return profesionales.map((profesional) => {
+    const hoy = deHoy.filter((turno) => turno.profesionalId === profesional.id)
+    const estado: EstadoDelProfesional = hoy.some(
+      (turno) => turno.estado === "en-sala",
+    )
+      ? "en-sala"
+      : hoy.length > 0
+        ? "con-turnos"
+        : "sin-turnos"
+
+    return {
+      ...profesional,
+      planta: plantaPorConsultorio.get(profesional.consultorio) ?? null,
+      estado,
+    }
   })
 }
