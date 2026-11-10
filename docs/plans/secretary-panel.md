@@ -309,3 +309,58 @@ itself must never scroll sideways.
 - Every card sits in the row of its hour, and its tint matches its estado, from the same map the
   badge uses.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P5
+
+P5 was planned as one stage of about 130 lines and measured 376 on the first cut, so it ships in
+three. P5-i is a prerequisite with no visible change, P5-ii filters, P5-iii explains the colours.
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P5-i | `frontend/src/lib/secretary/demo-data.ts` | `etiquetaDeSemana(fechas)` owns the week label |
+| P5-i | `frontend/src/components/secretary/agenda-grid.tsx` | Takes `label` and `dias` instead of six `Date` objects |
+| P5-i | `frontend/src/app/(panel)/agenda/page.tsx` | Builds the label and the day numbers from the request date |
+| P5-ii | `frontend/src/lib/secretary/demo-data.ts` | `turnosDeLaSemana()` and one shared join |
+| P5-ii | `frontend/src/components/secretary/agenda-filtros.tsx` | Three selects, options from the professionals fixture |
+| P5-ii | `frontend/src/components/secretary/agenda-grid.tsx` | Client state, filtering and the empty message |
+| P5-ii | `frontend/src/app/(panel)/agenda/page.tsx` | Passes the joined week |
+| P5-iii | `frontend/src/components/secretary/agenda-filtros.tsx` | The five-state legend |
+
+## Specification — P5-i
+
+**No date is formatted twice.** The grid becomes a client component in P5-ii, and a `Date` created on
+the server and formatted in the browser shifts a day whenever the two timezones disagree, which
+React reports as a hydration mismatch. The server therefore sends the label and the day numbers as
+primitives. On its own this stage changes nothing the user can see, which is why it is reviewable in
+one commit.
+
+## Specification — P5-ii
+
+**One list, filtered in place.** The page hands the grid the joined week and the grid filters it in
+memory, so the agenda still derives from the same fixtures and the same join as `/panel`.
+
+**The options come from the data.** The export lists invented professionals and specialties
+("Dra. Sofía Ramírez", "Cardiología Adultos") that no fixture contains. The selects list
+`profesionales`, so every option can actually match a turno.
+
+**Impossible combinations are possible.** In this fixture shape the specialty and the room are
+one-to-one with the professional, so Dra. Ferrero plus Cardiología matches nothing. The screen says
+so above the empty columns, with the wording the turnos table already uses, instead of leaving six
+silent columns.
+
+## Specification — P5-iii
+
+**The legend describes our states, not the export's.** The export shows four — Confirmado, Pendiente
+WP, En consulta, Cancelado. We have five, with different names, and `Atendido` is one of them. The
+legend reads from the `estados` map the badge already owns, so a colour cannot mean two things.
+
+## Acceptance criteria — P5
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/agenda` stays a partial prerender.
+- P5-i alone leaves the screen identical: same label, same six dates, same 34 cards.
+- With no filter the columns still split 12 / 5 / 4 / 5 / 4 / 4, and filtering by a professional
+  keeps only that professional's turnos in their own days.
+- Clearing the filters restores the 34 cards.
+- A combination with no turnos shows the message above the empty columns.
+- The legend shows five states with the real colours and none of the exported names.
+- No page-level horizontal overflow at 320 / 768 / 1280; console clean.

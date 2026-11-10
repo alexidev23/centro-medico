@@ -1,7 +1,12 @@
 "use client"
 
 import { ChevronDown } from "lucide-react"
-import { profesionales } from "@/lib/secretary/demo-data"
+import { estados } from "@/components/secretary/status-badge"
+import {
+  profesionales,
+  type TurnoEstado,
+} from "@/lib/secretary/demo-data"
+import { cn } from "@/lib/utils"
 
 export type FiltrosAgenda = {
   profesionalId: string
@@ -39,6 +44,14 @@ const opcionesConsultorio: Opcion[] = [
   ...unicos(profesionales.map(({ consultorio }) => consultorio)).map(
     (consultorio) => ({ valor: consultorio, etiqueta: consultorio }),
   ),
+]
+
+const ordenEstados: TurnoEstado[] = [
+  "confirmado",
+  "pendiente",
+  "en-sala",
+  "atendido",
+  "cancelado",
 ]
 
 function SelectFiltro({
@@ -84,25 +97,46 @@ function AgendaFiltros({
   onChange: (filtros: FiltrosAgenda) => void
 }) {
   return (
-    <div className="flex flex-col gap-md rounded-xl border border-surface-subtle bg-card p-md shadow-card sm:flex-row">
-      <SelectFiltro
-        label="Profesional"
-        valor={filtros.profesionalId}
-        opciones={opcionesProfesional}
-        onChange={(profesionalId) => onChange({ ...filtros, profesionalId })}
-      />
-      <SelectFiltro
-        label="Especialidad"
-        valor={filtros.especialidad}
-        opciones={opcionesEspecialidad}
-        onChange={(especialidad) => onChange({ ...filtros, especialidad })}
-      />
-      <SelectFiltro
-        label="Consultorio"
-        valor={filtros.consultorio}
-        opciones={opcionesConsultorio}
-        onChange={(consultorio) => onChange({ ...filtros, consultorio })}
-      />
+    <div className="flex flex-col gap-md rounded-xl border border-surface-subtle bg-card p-md shadow-card xl:flex-row xl:items-end xl:justify-between">
+      <div className="flex flex-1 flex-col gap-md sm:flex-row">
+        <SelectFiltro
+          label="Profesional"
+          valor={filtros.profesionalId}
+          opciones={opcionesProfesional}
+          onChange={(profesionalId) => onChange({ ...filtros, profesionalId })}
+        />
+        <SelectFiltro
+          label="Especialidad"
+          valor={filtros.especialidad}
+          opciones={opcionesEspecialidad}
+          onChange={(especialidad) => onChange({ ...filtros, especialidad })}
+        />
+        <SelectFiltro
+          label="Consultorio"
+          valor={filtros.consultorio}
+          opciones={opcionesConsultorio}
+          onChange={(consultorio) => onChange({ ...filtros, consultorio })}
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-md">
+        {ordenEstados.map((estado) => {
+          const { label, dot } = estados[estado]
+
+          return (
+            <span
+              key={estado}
+              className="flex items-center gap-1.5 text-label-sm text-fg-secondary"
+            >
+              <span
+                className={cn("size-2.5 rounded-full", dot)}
+                aria-hidden="true"
+              />
+              {label}
+            </span>
+          )
+        })}
+      </div>
     </div>
   )
 }
