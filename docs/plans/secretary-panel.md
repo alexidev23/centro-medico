@@ -364,3 +364,70 @@ legend reads from the `estados` map the badge already owns, so a colour cannot m
 - A combination with no turnos shows the message above the empty columns.
 - The legend shows five states with the real colours and none of the exported names.
 - No page-level horizontal overflow at 320 / 768 / 1280; console clean.
+
+## Scope — P6
+
+P6 was planned in two stages of about 215 lines. It ships in three, because the first cut measured
+287 and the seam that actually holds is data first, screen second, search third.
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P6-i | `frontend/src/lib/secretary/demo-data.ts` | `proveedor`, `plan`, `telefono`, `etiquetasDia`, `pacientesDelPadron()` |
+| P6-i | `frontend/src/lib/utils.ts` | `initials()` shared by both tables |
+| P6-i | `frontend/src/components/secretary/today-turnos.tsx` | Uses `coberturaDe()` and the shared `initials()` |
+| P6-i | `frontend/src/components/secretary/agenda-grid.tsx` | Uses the shared `etiquetasDia` |
+| P6-ii | `frontend/src/components/secretary/patient-directory.tsx` | The table |
+| P6-ii | `frontend/src/app/(panel)/pacientes/page.tsx` | The route |
+| P6-ii | `frontend/src/components/secretary/panel-sidebar.tsx` | `Pacientes` enabled |
+
+## Specification — P6-i
+
+**The coverage gets a shape.** "OSDE 210" is two facts in one string, and the design needs both: the
+provider in bold and the plan under it. `Paciente` stores `proveedor` and `plan`, and `plan` is
+`null` for `Particular`, which has no plan to show. `coberturaDe()` rebuilds the one-line form for
+the dashboard table, so the two screens cannot drift.
+
+**The next turno is derived, never typed.** It is the first turno of that patient from today that is
+not `cancelado` and not `atendido`: a cancelled or already-attended turno is behind the secretary,
+not ahead. The fixtures cover one repeated week, so a patient with nothing left this week shows the
+same weekday of the next one, and a patient with nothing at all — the ninth fixture, registered but
+never booked — says so.
+
+**Dates stay on the server.** Same reason as the agenda label: a `Date` built on the server and
+formatted in the browser moves a day when the timezones disagree. The label carries the month
+("Mar 10 nov, 12:00 hs") because a bare day number in a table with no month reads wrong as soon as
+the week crosses into the next one.
+
+**Calendar days are not fixture days.** The fixtures run Monday to Saturday; the calendar runs
+Sunday to Saturday. Counting the distance between the two with the fixture list alone makes the
+next Monday one day short, which is exactly the bug the rendered check caught (`Lun 15` for a
+`Lun 16`). The distance is counted on `fecha.getDay()`, and Sunday is the day the sede is closed, so
+the directory starts on Monday.
+
+## Specification — P6-ii
+
+**Five columns, four of them with a decision.** The export shows photo, age, provider, plan, phone,
+next appointment and an `Activo` badge. Photos are remote images from the export and the repository
+has none, so the avatar is the patient's initials. Age needs a birth date the dataset does not have,
+and inventing one to print a number is decoration. `Activo` is not a concept in this system, so the
+column derives `Con turno` / `Sin turno` from the same next-turno derivation, which is also what
+makes the design's "Con turno próximo" chip real instead of decorative. `Contacto` is hidden below
+`xl`, where the table would otherwise squeeze the name to an ellipsis.
+
+**One screen, one source.** The page formats every row on the server and hands the table plain
+strings, so P6-iii can turn it into a client component without a hydration mismatch.
+
+**Left out on purpose.** "Nuevo Paciente" needs a form and a backend. The three-dot menu needs
+something to open. Rows are not selectable yet: selecting a patient without the record panel beside
+it (P7) would do nothing. The export's `#HC` is not a concept here, so the search will not promise it.
+
+## Acceptance criteria — P6-i / P6-ii
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/pacientes` is a partial prerender.
+- The nine fixtures render, each with its real next turno and professional, or `Sin turno agendado`.
+- Every patient with a turno still ahead says `Con turno`; the one without says `Sin turno`.
+- A patient with nothing left this week shows the next week's date, not the past.
+- The sidebar marks `Pacientes` as the active section.
+- The `Contacto` column appears only at `xl` and up.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; the table scrolls inside its
+  own container on phones, where 40rem does not fit. Console clean.
