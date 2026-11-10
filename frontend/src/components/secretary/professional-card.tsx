@@ -1,4 +1,4 @@
-import { DoorOpen } from "lucide-react"
+import { CalendarDays, DoorOpen } from "lucide-react"
 import type {
   EstadoDelProfesional,
   ProfesionalDelCuerpo,
@@ -77,6 +77,11 @@ function ProfessionalCard({
             {profesional.duracion} min
           </span>
         </p>
+        <p className="flex items-center gap-1.5">
+          <CalendarDays className="size-4 shrink-0 text-primary" aria-hidden="true" />
+          <span className="min-w-0">{profesional.dias}</span>
+        </p>
+        <p className="pl-6 text-label-sm">{profesional.franja}</p>
       </div>
     </article>
   )

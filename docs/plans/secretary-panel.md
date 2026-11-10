@@ -759,3 +759,41 @@ from anything the fixtures do not know.
 - First card reads `LF`, `M.P. 34.892`, `Clínica médica`, `Consultorio 2 (Planta Baja)`, `30 min`.
 - No card shows an hour range yet: the week is P8-ii-b.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P8-ii-b
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P8-ii-b | `frontend/src/lib/secretary/demo-data.ts` | `nombresDia`, `dias` and `franja` on `ProfesionalDelCuerpo`, derivation in `cuerpoProfesional()` |
+| P8-ii-b | `frontend/src/components/secretary/professional-card.tsx` | The two lines under the room row |
+
+## Specification — P8-ii-b
+
+**Full day names, and only the days they attend.** The design writes "Lunes, Miércoles y Jueves", so
+`nombresDia` joins the existing abbreviated `etiquetasDia` and the card reads the same way. The list is
+filtered against the days that have a turno for that professional this week.
+
+**One span, plus the count.** The design draws a split shift ("08:30 a 13:00 hs • 15:30 a 19:30 hs").
+Nothing in the fixtures declares a mid-day break, and inferring one from a gap would invent a working
+day nobody agreed to, so the card prints a single range with the number of turnos behind it:
+`08:00 a 11:00 hs • 6 turnos`. The count is what keeps the range honest: it is the span of their
+agenda, not a promise of continuous availability.
+
+**The hours are sorted, and cancelled turnos do not count.** Building the range from the first and last
+element of the fixture list printed `11:00 a 09:00 hs`, because the list is ordered by when the turnos
+were written, not by when they happen. A cancelled turno is not time the professional attends, so it
+counts for neither the days, the span, nor the number.
+
+**Degenerate ranges.** One turno prints `09:00 hs • 1 turno`; a professional with nothing scheduled
+prints "Sin turnos esta semana" instead of an empty range. Today no card hits either branch.
+
+## Acceptance criteria — P8-ii-b
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/profesionales` is a partial prerender.
+- Each card's days and franja match its agenda, with cancelled turnos excluded:
+  Ferrero `Lunes, Martes, Jueves, Viernes y Sábado` · `08:00 a 11:00 hs • 6 turnos`;
+  Salguero `08:30 a 15:00 hs • 6 turnos`; Iturbe `08:00 a 12:00 hs • 5 turnos`;
+  Paz `11:00 a 15:00 hs • 4 turnos`; Ledesma `Lunes, Martes y Jueves` · `09:00 a 16:00 hs • 4 turnos`;
+  Quiroga `08:30 a 12:30 hs • 5 turnos`.
+- No range runs backwards, and no card prints an hour that is not one of its own turnos.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.

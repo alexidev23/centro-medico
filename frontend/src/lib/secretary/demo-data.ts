@@ -153,6 +153,16 @@ export const etiquetasDia: Record<DiaSemana, string> = {
   sab: "Sáb",
 }
 
+/** Full names, for prose: the card writes "Lunes, Miércoles y Jueves". */
+export const nombresDia: Record<DiaSemana, string> = {
+  lun: "Lunes",
+  mar: "Martes",
+  mie: "Miércoles",
+  jue: "Jueves",
+  vie: "Viernes",
+  sab: "Sábado",
+}
+
 export type FechaDeLaSemana = {
   dia: DiaSemana
   fecha: Date
@@ -475,22 +485,53 @@ export type ProfesionalDelCuerpo = Profesional & {
   /** `null` when the room is not in the sede's list; never a guessed floor. */
   planta: Planta | null
   estado: EstadoDelProfesional
+  /** "Lunes, Martes y Jueves" — only the days they actually attend. */
+  dias: string
+  /** "08:00 a 11:00 hs • 6 turnos"; never a range the agenda contradicts. */
+  franja: string
 }
 
 const plantaPorConsultorio = new Map(
   consultorios.map(({ nombre, planta }) => [nombre, planta] as const),
 )
 
+function unirDias(dias: DiaSemana[]) {
+  const nombres = dias.map((dia) => nombresDia[dia])
+  if (nombres.length < 2) return nombres.join("")
+
+  return `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`
+}
+
 /**
- * The staff grid: every professional with the floor of their room and the state
- * of today's agenda, read from the same fixtures the agenda below already uses.
+ * The staff grid: every professional with the floor of their room, the state of
+ * today's agenda and the week they actually work. All of it comes from the same
+ * fixtures the agenda already reads, so a card cannot promise a day, an hour or
+ * a turno the grid below it contradicts.
  */
 export function cuerpoProfesional(fecha: Date): ProfesionalDelCuerpo[] {
   const dia = diaDeLaSemana(fecha)
   const deHoy = dia === null ? [] : turnosDelDia(dia)
+  const deLaSemana = turnosDeLaSemana()
 
   return profesionales.map((profesional) => {
+    // A cancelled turno is not time they attend, so it counts for neither the
+    // days, the franja, nor the count.
+    const propios = deLaSemana.filter(
+      (turno) =>
+        turno.profesionalId === profesional.id && turno.estado !== "cancelado",
+    )
     const hoy = deHoy.filter((turno) => turno.profesionalId === profesional.id)
+    const dias = diasDeLaSemana.filter((candidato) =>
+      propios.some((turno) => turno.dia === candidato),
+    )
+
+    // Sorted, because the fixture order is the order turnos were written, not
+    // the order they happen: without this, a card read "11:00 a 09:00 hs".
+    const horas = propios.map((turno) => turno.hora).sort()
+    const desde = horas[0]
+    const hasta = horas[horas.length - 1]
+    const cantidad = `${propios.length} ${propios.length === 1 ? "turno" : "turnos"}`
+
     const estado: EstadoDelProfesional = hoy.some(
       (turno) => turno.estado === "en-sala",
     )
@@ -503,6 +544,13 @@ export function cuerpoProfesional(fecha: Date): ProfesionalDelCuerpo[] {
       ...profesional,
       planta: plantaPorConsultorio.get(profesional.consultorio) ?? null,
       estado,
+      dias: unirDias(dias),
+      franja:
+        desde === undefined
+          ? "Sin turnos esta semana"
+          : desde === hasta
+            ? `${desde} hs • ${cantidad}`
+            : `${desde} a ${hasta} hs • ${cantidad}`,
     }
   })
 }
