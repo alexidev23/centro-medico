@@ -534,3 +534,46 @@ the current week instead, when the Historial slice arrives. Notas Secretaría, F
 - At 1280 the record sits beside the table; at 1024 and 768 it stacks under it, and tapping a row
   brings it into view.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P7-ii
+
+The approved plan put the tab bar and the card in this stage. Measured, it came to 232 lines: data 46,
+card 56, tab bar 72, Datos panel 34, wiring 24. That is over the cap, so the stage ships the data and
+the card, and the tab bar travels with the Datos panel into P7-iii — a tab that switches to an empty
+panel would be a lie about what the screen can do.
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P7-ii | `frontend/src/lib/secretary/demo-data.ts` | `proximo` gains the whole turno; `fechaDelTurno()`, `fechaLarga()` |
+| P7-ii | `frontend/src/components/secretary/patient-history.tsx` | The próximo-turno card |
+| P7-ii | `frontend/src/components/secretary/patient-record.tsx` | Renders the card under the identity |
+
+## Specification — P7-ii
+
+**One derivation, two readers.** `pacientesDelPadron()` already finds each patient's next turno; the
+card reads that same object instead of scanning the week a second time. `proximo` grows from
+`{ cuando, profesional }` to the whole turno — long date, hour, professional, specialty, consultorio,
+motivo and estado — and the table keeps printing the two fields it already used, so nothing on the
+directory moves.
+
+**The card prints what the turno has.** Estado is the pill `StatusBadge` already defines, so the
+record speaks the same five states as the agenda instead of inventing a vocabulary. Consultorio and
+motivo come from the fixtures too; neither is decoration.
+
+**The date is written on the server.** `fechaLarga()` formats with `es-AR` on the server and
+capitalises the weekday, for the same reason as every other label in this app: a `Date` formatted in
+the browser moves a day when the timezones disagree.
+
+**A patient with nothing left this week** keeps showing the weekday of the next one — the same turno
+the table shows. The card is titled "Próximo turno", not "esta semana", so it promises exactly that.
+
+**Honest emptiness.** Irene Salas has no turnos at all and the card says so; it does not invent one.
+
+## Acceptance criteria — P7-ii
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/pacientes` is a partial prerender.
+- For each of the nine patients, the card's hour and professional match the directory's próximo
+  column, the long date reads like `Martes 10 de noviembre`, the pill is one of the real states, and
+  consultorio and motivo appear.
+- Irene Salas shows `Este paciente no tiene turnos agendados.` instead of a card.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.

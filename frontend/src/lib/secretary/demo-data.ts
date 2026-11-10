@@ -238,8 +238,21 @@ function conPacienteYProfesional(turno: Turno): TurnoDelDia {
   return { ...turno, paciente, profesional }
 }
 
+export type ProximoTurno = {
+  /** "Jue 12 nov, 16:00 hs" — what the directory table prints. */
+  cuando: string
+  profesional: string
+  /** "Jueves 12 de noviembre" — the headline of the record card. */
+  dia: string
+  hora: string
+  especialidad: string
+  consultorio: string
+  motivo: string
+  estado: TurnoEstado
+}
+
 export type PacienteDelPadron = Paciente & {
-  proximo: { cuando: string; profesional: string } | null
+  proximo: ProximoTurno | null
   edad: number
   nacimientoTexto: string
 }
@@ -269,16 +282,35 @@ const diaYMesFormatter = new Intl.DateTimeFormat("es-AR", {
   month: "short",
 })
 
+const fechaLargaFormatter = new Intl.DateTimeFormat("es-AR", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+})
+
+/** The calendar day a turno of this week falls on. */
+function fechaDelTurno(fecha: Date, enDias: number) {
+  const delDia = new Date(fecha)
+  delDia.setDate(fecha.getDate() + enDias)
+
+  return delDia
+}
+
 /**
  * "Lun 16 nov, 16:00 hs". Dates are formatted here, on the server, for the same
  * reason the agenda label is: the browser's timezone must not move a day.
  */
 function etiquetaDeTurno(fecha: Date, turno: TurnoDelDia, enDias: number) {
-  const delDia = new Date(fecha)
-  delDia.setDate(fecha.getDate() + enDias)
-  const diaYMes = diaYMesFormatter.format(delDia).replace(".", "")
+  const diaYMes = diaYMesFormatter.format(fechaDelTurno(fecha, enDias)).replace(".", "")
 
   return `${etiquetasDia[turno.dia]} ${diaYMes}, ${turno.hora} hs`
+}
+
+/** "Jueves 12 de noviembre": the long form the record card shows. */
+function fechaLarga(fecha: Date, enDias: number) {
+  const texto = fechaLargaFormatter.format(fechaDelTurno(fecha, enDias))
+
+  return `${texto[0].toUpperCase()}${texto.slice(1).replace(",", "")}`
 }
 
 /**
@@ -319,6 +351,12 @@ export function pacientesDelPadron(fecha: Date): PacienteDelPadron[] {
           proximo: {
             cuando: etiquetaDeTurno(fecha, turno, enDias),
             profesional: turno.profesional.nombre,
+            dia: fechaLarga(fecha, enDias),
+            hora: `${turno.hora} hs`,
+            especialidad: turno.profesional.especialidad,
+            consultorio: turno.profesional.consultorio,
+            motivo: turno.motivo,
+            estado: turno.estado,
           },
         }
       }

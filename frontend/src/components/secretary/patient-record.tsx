@@ -1,3 +1,4 @@
+import { PatientHistory } from "@/components/secretary/patient-history"
 import { coberturaDe, type PacienteDelPadron } from "@/lib/secretary/demo-data"
 import { initials } from "@/lib/utils"
 
@@ -24,6 +25,8 @@ function PatientRecord({ paciente }: { paciente: PacienteDelPadron }) {
           </span>
         </div>
       </div>
+
+      <PatientHistory proximo={paciente.proximo} />
     </section>
   )
 }
