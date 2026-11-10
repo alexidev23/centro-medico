@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { connection } from "next/server"
-import { ProfessionalCard } from "@/components/secretary/professional-card"
+import { ProfessionalsDirectory } from "@/components/secretary/professionals-directory"
 import { ProfessionalsHeader } from "@/components/secretary/professionals-header"
 import { ProfessionalsSummary } from "@/components/secretary/professionals-summary"
 import {
@@ -23,14 +23,7 @@ async function CuerpoProfesional() {
     <>
       <ProfessionalsHeader gestion={fecha.getFullYear()} />
       <ProfessionalsSummary resumen={resumenDelCuerpoProfesional(fecha)} />
-      <section
-        aria-label="Cuerpo profesional"
-        className="grid gap-md sm:grid-cols-2 xl:grid-cols-3"
-      >
-        {cuerpo.map((profesional) => (
-          <ProfessionalCard key={profesional.id} profesional={profesional} />
-        ))}
-      </section>
+      <ProfessionalsDirectory cuerpo={cuerpo} />
     </>
   )
 }

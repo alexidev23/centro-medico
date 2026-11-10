@@ -667,7 +667,7 @@ each stage stays reviewable:
 | P8-i | Route, header, the three real numbers, sidebar enabled |
 | P8-ii | The card grid: identity, room and state |
 | P8-ii-b | The professional's week on the card |
-| P8-iii | Search and specialty chips |
+| P8-iii | Search and specialty chips with real counts |
 | P8-iv | Physical distribution of the consultorios |
 
 ## Scope — P8-i
@@ -796,4 +796,50 @@ prints "Sin turnos esta semana" instead of an empty range. Today no card hits ei
   Paz `11:00 a 15:00 hs • 4 turnos`; Ledesma `Lunes, Martes y Jueves` · `09:00 a 16:00 hs • 4 turnos`;
   Quiroga `08:30 a 12:30 hs • 5 turnos`.
 - No range runs backwards, and no card prints an hour that is not one of its own turnos.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P8-iii
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P8-iii | `frontend/src/components/secretary/professionals-directory.tsx` | **New**, client: search, specialty chips, grid, empty state |
+| P8-iii | `frontend/src/app/(panel)/profesionales/page.tsx` | The grid moves behind that component |
+| P8-iii | `frontend/src/lib/secretary/demo-data.ts` | `dondeAtiende` on `ProfesionalDelCuerpo` |
+| P8-iii | `frontend/src/components/secretary/professional-card.tsx` | Renders `dondeAtiende` instead of formatting the room itself |
+
+## Specification — P8-iii
+
+**One formatting rule for a room.** `cuerpoProfesional()` now derives `dondeAtiende`
+("Consultorio 2 (Planta Baja)"), the card renders it, and the search reads it. Without that, the card
+and the search would each build the same string and could drift apart.
+
+**The search forgives what readers type.** `normalizar()` strips accents and case, so `pediatria`
+finds "Pediatría"; `alfanumerico()` drops dots and dashes, so `34892` finds "34.892". The haystack is
+the name, the M.P. and the full room, which is why `planta alta` returns the three professionals on
+that floor without the floor being a separate field of the search.
+
+**Counts come from the grid itself.** `Todas` prints the size of `cuerpo` and each chip counts its own
+specialty, so the numbers cannot disagree with what the chip produces. The design prints
+`Todas 12 / Clínica Médica 3 / Cardiología 2`; this sede has six professionals, one per specialty, so
+the chips read `6` and six `1`. That is the real distribution, not a placeholder.
+
+**Search and chips combine.** The search is applied inside the selected specialty, so a chip narrows
+and the query narrows further; `Todas` is the reset, and the `X` clears only the query.
+
+**Empty is a message, not a blank grid.** With no match, a single line replaces the grid:
+"No hay profesionales con este filtro."
+
+**Out of scope.** `Planta: Todos` is the filter P8-iv owns, because it needs the floor distribution that
+stage brings; `Más filtros` is not built, because there are no further filters behind it.
+
+## Acceptance criteria — P8-iii
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/profesionales` is a partial prerender.
+- Seven chips in fixture order, `Todas 6` active on load, the six specialties counting `1`.
+- `iturbe` leaves Paula Iturbe; `34892` leaves Lucía Ferrero; `PLANTA ALTA` leaves three; `zzz` leaves
+  none and shows the message; clearing the query restores the six.
+- The `Cardiología` chip leaves one card, marks itself `aria-pressed="true"` and clears `Todas`;
+  `Todas` restores the six and the message is gone.
+- A search that matches nothing inside a selected specialty shows the message instead of the grid.
+- `/pacientes` still renders its rows and its search input.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.

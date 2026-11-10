@@ -37,7 +37,6 @@ function ProfessionalCard({
   profesional: ProfesionalDelCuerpo
 }) {
   const { label, pill, dot } = estados[profesional.estado]
-  const planta = profesional.planta === null ? "" : ` (Planta ${profesional.planta})`
 
   return (
     <article className="flex flex-col gap-sm rounded-xl border border-surface-subtle bg-card p-md shadow-card">
@@ -69,10 +68,7 @@ function ProfessionalCard({
       <div className="flex flex-col gap-1 border-t border-surface-subtle pt-sm text-body-sm text-fg-secondary">
         <p className="flex items-center gap-1.5">
           <DoorOpen className="size-4 shrink-0 text-primary" aria-hidden="true" />
-          <span className="min-w-0 truncate">
-            {profesional.consultorio}
-            {planta}
-          </span>
+          <span className="min-w-0 truncate">{profesional.dondeAtiende}</span>
           <span className="ml-auto shrink-0 text-label-sm font-semibold text-foreground">
             {profesional.duracion} min
           </span>

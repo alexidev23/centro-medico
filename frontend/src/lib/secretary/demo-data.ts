@@ -484,6 +484,8 @@ export type EstadoDelProfesional = "en-sala" | "con-turnos" | "sin-turnos"
 export type ProfesionalDelCuerpo = Profesional & {
   /** `null` when the room is not in the sede's list; never a guessed floor. */
   planta: Planta | null
+  /** "Consultorio 2 (Planta Baja)" — the room as the card and the search read it. */
+  dondeAtiende: string
   estado: EstadoDelProfesional
   /** "Lunes, Martes y Jueves" — only the days they actually attend. */
   dias: string
@@ -531,6 +533,7 @@ export function cuerpoProfesional(fecha: Date): ProfesionalDelCuerpo[] {
     const desde = horas[0]
     const hasta = horas[horas.length - 1]
     const cantidad = `${propios.length} ${propios.length === 1 ? "turno" : "turnos"}`
+    const planta = plantaPorConsultorio.get(profesional.consultorio) ?? null
 
     const estado: EstadoDelProfesional = hoy.some(
       (turno) => turno.estado === "en-sala",
@@ -542,7 +545,11 @@ export function cuerpoProfesional(fecha: Date): ProfesionalDelCuerpo[] {
 
     return {
       ...profesional,
-      planta: plantaPorConsultorio.get(profesional.consultorio) ?? null,
+      planta,
+      dondeAtiende:
+        planta === null
+          ? profesional.consultorio
+          : `${profesional.consultorio} (Planta ${planta})`,
       estado,
       dias: unirDias(dias),
       franja:
