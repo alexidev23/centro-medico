@@ -1,33 +1,12 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import type { ReactNode } from "react"
 import { Phone, Search, Users, X } from "lucide-react"
+import type { FiltrosPadron } from "@/components/secretary/use-filtros-padron"
 import type { PacienteDelPadron } from "@/lib/secretary/demo-data"
 import { cn, initials } from "@/lib/utils"
 
 const cell = "px-3 py-4 align-top"
-
-const normalizar = (texto: string) =>
-  texto
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-
-const soloDigitos = (texto: string) => texto.replace(/\D/g, "")
-
-const coincide = (paciente: PacienteDelPadron, consulta: string) => {
-  if (consulta === "") return true
-
-  const texto = normalizar(consulta)
-  const digitos = soloDigitos(consulta)
-
-  return (
-    normalizar(paciente.nombre).includes(texto) ||
-    (digitos !== "" &&
-      (soloDigitos(paciente.documento).includes(digitos) ||
-        soloDigitos(paciente.telefono).includes(digitos)))
-  )
-}
 
 function Chip({
   activo,
@@ -55,18 +34,22 @@ function Chip({
   )
 }
 
-function PatientDirectory({ pacientes }: { pacientes: PacienteDelPadron[] }) {
-  const [consulta, setConsulta] = useState("")
-  const [cobertura, setCobertura] = useState("todas")
-  const [soloConTurno, setSoloConTurno] = useState(false)
-
+function PatientDirectory({
+  pacientes,
+  visibles,
+  filtros,
+  onFiltros,
+  seleccionadoId,
+  onSeleccionar,
+}: {
+  pacientes: PacienteDelPadron[]
+  visibles: PacienteDelPadron[]
+  filtros: FiltrosPadron
+  onFiltros: (filtros: FiltrosPadron) => void
+  seleccionadoId: string | null
+  onSeleccionar: (id: string) => void
+}) {
   const coberturas = [...new Set(pacientes.map(({ proveedor }) => proveedor))]
-  const visibles = pacientes.filter(
-    (paciente) =>
-      (cobertura === "todas" || paciente.proveedor === cobertura) &&
-      (!soloConTurno || paciente.proximo !== null) &&
-      coincide(paciente, consulta),
-  )
 
   return (
     <section className="flex flex-col gap-lg rounded-xl border border-surface-subtle bg-card p-lg shadow-card">
@@ -95,17 +78,17 @@ function PatientDirectory({ pacientes }: { pacientes: PacienteDelPadron[] }) {
           />
           <input
             type="search"
-            value={consulta}
-            onChange={(event) => setConsulta(event.target.value)}
+            value={filtros.consulta}
+            onChange={(event) => onFiltros({ ...filtros, consulta: event.target.value })}
             placeholder="Buscar por nombre, DNI o teléfono"
             aria-label="Buscar paciente"
             className="h-12 w-full rounded-xl bg-surface-subtle pr-11 pl-11 text-body-md text-foreground placeholder:text-fg-secondary"
           />
-          {consulta === "" ? null : (
+          {filtros.consulta === "" ? null : (
             <button
               type="button"
               aria-label="Limpiar búsqueda"
-              onClick={() => setConsulta("")}
+              onClick={() => onFiltros({ ...filtros, consulta: "" })}
               className="absolute top-1/2 right-3 -translate-y-1/2 rounded-lg p-1 text-fg-secondary hover:text-foreground"
             >
               <X className="size-4" aria-hidden="true" />
@@ -115,23 +98,31 @@ function PatientDirectory({ pacientes }: { pacientes: PacienteDelPadron[] }) {
 
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-label-sm text-fg-secondary">Cobertura:</span>
-          <Chip activo={cobertura === "todas"} onClick={() => setCobertura("todas")}>
+          <Chip
+            activo={filtros.cobertura === "todas"}
+            onClick={() => onFiltros({ ...filtros, cobertura: "todas" })}
+          >
             Todas
           </Chip>
           {coberturas.map((proveedor) => (
             <Chip
               key={proveedor}
-              activo={cobertura === proveedor}
-              onClick={() => setCobertura(proveedor)}
+              activo={filtros.cobertura === proveedor}
+              onClick={() => onFiltros({ ...filtros, cobertura: proveedor })}
             >
               {proveedor}
             </Chip>
           ))}
-          <Chip activo={soloConTurno} onClick={() => setSoloConTurno(!soloConTurno)}>
+          <Chip
+            activo={filtros.soloConTurno}
+            onClick={() =>
+              onFiltros({ ...filtros, soloConTurno: !filtros.soloConTurno })
+            }
+          >
             <span
               className={cn(
                 "size-2 rounded-full",
-                soloConTurno ? "bg-primary" : "bg-fg-secondary",
+                filtros.soloConTurno ? "bg-primary" : "bg-fg-secondary",
               )}
               aria-hidden="true"
             />
@@ -170,11 +161,26 @@ function PatientDirectory({ pacientes }: { pacientes: PacienteDelPadron[] }) {
           <tbody className="divide-y divide-surface-subtle">
             {visibles.map((paciente) => {
               const { proximo } = paciente
+              const activo = paciente.id === seleccionadoId
 
               return (
                 <tr
                   key={paciente.id}
-                  className="transition-colors hover:bg-primary-subtle/50"
+                  aria-current={activo ? "true" : undefined}
+                  tabIndex={0}
+                  onClick={() => onSeleccionar(paciente.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault()
+                      onSeleccionar(paciente.id)
+                    }
+                  }}
+                  className={cn(
+                    "cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-primary",
+                    activo
+                      ? "bg-primary-subtle/60 shadow-[inset_3px_0_0_0_var(--color-primary)]"
+                      : "hover:bg-primary-subtle/50",
+                  )}
                 >
                   <td className={cell}>
                     <div className="flex items-center gap-sm">
@@ -182,7 +188,18 @@ function PatientDirectory({ pacientes }: { pacientes: PacienteDelPadron[] }) {
                         {initials(paciente.nombre)}
                       </span>
                       <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-label-lg font-semibold text-foreground">
+                        {/*
+                          Plain concatenation on purpose: cn() would silently drop
+                          text-label-lg, because tailwind-merge reads an unknown
+                          text-* utility as a color and keeps only the last one.
+                        */}
+                        <span
+                          className={`truncate text-label-lg ${
+                            activo
+                              ? "font-bold text-primary"
+                              : "font-semibold text-foreground"
+                          }`}
+                        >
                           {paciente.nombre}
                         </span>
                         <span className="text-body-sm whitespace-nowrap text-fg-secondary">

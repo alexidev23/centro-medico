@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { connection } from "next/server"
-import { PatientDirectory } from "@/components/secretary/patient-directory"
+import { PatientWorkspace } from "@/components/secretary/patient-workspace"
 import { pacientesDelPadron } from "@/lib/secretary/demo-data"
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 async function Padron() {
   await connection()
 
-  return <PatientDirectory pacientes={pacientesDelPadron(new Date())} />
+  return <PatientWorkspace pacientes={pacientesDelPadron(new Date())} />
 }
 
 export default function PacientesPage() {

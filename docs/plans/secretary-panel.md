@@ -460,3 +460,77 @@ re-indented: the stage is additions, not churn. It is the same lesson P5 learned
 - The clear button appears only with text, empties the field and restores the nine rows.
 - Clearing the chips restores the nine rows and the `9 pacientes` badge.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P7
+
+P7 was approved in three slices: identity, Historial, Datos. It lands as more than three, because the
+record needs patient data the table never had, and the first cut of the identity slice measured 271.
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P7-i | `frontend/src/lib/secretary/demo-data.ts` | `nacimiento`, `domicilio`, `email`, `edad`, `nacimientoTexto` |
+| P7-i | `frontend/src/components/secretary/use-filtros-padron.ts` | Filter state and visible rows out of the table |
+| P7-i | `frontend/src/components/secretary/patient-workspace.tsx` | 7/5 layout, selection, mobile scroll |
+| P7-i | `frontend/src/components/secretary/patient-record.tsx` | The identity card, not the whole record |
+| P7-i | `frontend/src/components/secretary/patient-directory.tsx` | Controlled filters, selectable rows |
+| P7-i | `frontend/src/app/(panel)/pacientes/page.tsx` | Renders the workspace |
+
+## Specification — P7-i (data)
+
+**The record needs data the table never showed.** Each patient fixture gains `nacimiento`
+(`YYYY-MM-DD`), `domicilio` and `email`. The age is not stored: `edad` and `nacimientoTexto` are
+computed in `pacientesDelPadron()`, against the same `fecha` the directory already receives, so the
+number cannot age in the browser and the month cannot move with the timezone — the same reason the
+agenda label is formatted on the server.
+
+**The filter state moves out of the table.** The record beside the table has to follow the rows the
+filters leave, so `useFiltrosPadron()` owns the filters and the visible rows, and the directory
+receives both. The search, the coverage chips and the "Con turno próximo" toggle keep behaving
+exactly as P6-iii left them: the move is a relocation, not a rewrite.
+
+## Specification — P7-i (screen)
+
+**The record starts as its identity.** Initials, name, age, DNI and the coverage pill. That is what
+the export shows above the tabs, and it is what a secretary needs at a glance while the phone rings.
+
+**The selection cannot point at a hidden row.** The selected patient is
+`visibles.find(...) ?? visibles[0] ?? null`, computed during render, with no effect. A filter that
+hides the chosen patient falls back to the first one on screen; clearing that filter brings the
+previous choice back, because the choice was never overwritten.
+
+**The row is reachable without a mouse.** Each row is focusable, activates with `Enter` and `Space`,
+marks itself with `aria-current` and a left bar inside the row, and colours the name. Below `xl`,
+where the record sits under the table, selecting a row scrolls the record into view.
+
+**The grid has to shrink.** The table carries a `min-w-[40rem]`; inside a grid column, an `auto`
+minimum width lets it push the whole page. Both columns are `min-w-0`, so the table keeps scrolling
+inside its own container and the page does not.
+
+**Trap worth remembering.** `cn()` merges with `tailwind-merge`, which reads an unknown `text-*`
+utility as a colour: `cn("text-label-lg", "text-primary")` silently keeps only `text-primary`. Any
+conditional colour cannot share a call with a theme font size. This stage concatenates that one
+class string by hand; the same collision exists in older components and is not fixed here.
+
+**Left out on purpose.** `#HC` and "Credencial Digital Validada" are not concepts in this system.
+The green `activo` dot would claim a state nothing tracks. Allergies and blood type are clinical
+safety data, and inventing them is worse than omitting them. The export's WhatsApp link is dropped:
+the fixture phone numbers are invented and `wa.me` would open a real stranger's chat. "Turnos
+Anteriores" lists 2024 turnos the fixtures do not contain, so the record shows the patient's turnos of
+the current week instead, when the Historial slice arrives. Notas Secretaría, Facturación y Coseguro,
+"Registro de Ausencias", "Agendar turno", "Editar datos" and the three-dot menu need a backend.
+
+## Acceptance criteria — P7-i
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/pacientes` is a partial prerender.
+- The nine rows render and the first one is selected: the record reads Ana Lucero, 38 años,
+  DNI 28.442.119, OSDE 210.
+- Clicking the second row shows Bruno Cáceres, 36 años, DNI 31.208.774, Swiss Medical SMG20, and only
+  that row carries `aria-current`.
+- `Enter` on the third row shows Carla Domínguez, 30 años; `Space` on the fifth shows Elena Bustos,
+  74 años, PAMI.
+- Searching `Irene` leaves one row and the record shows Irene Salas, 28 años; clearing the search
+  brings the previous selection back, since it is visible again.
+- The `Swiss Medical` chip leaves one row and the record follows it.
+- At 1280 the record sits beside the table; at 1024 and 768 it stacks under it, and tapping a row
+  brings it into view.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
