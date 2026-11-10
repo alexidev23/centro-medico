@@ -250,3 +250,62 @@ move inside the `Suspense` boundary the date line already uses. `/panel` stays a
 - No screen contains a second, parallel list of turnos: the dashboard and the agenda both call the
   same helpers.
 - Sunday renders the closed message and no card with an invented number.
+
+## Scope — P4b
+
+The stage was planned as one and split in two once the hand-authored count reached 232 lines, above
+the 150-200 cap. P4b-i is the reachable skeleton and P4b-ii fills it with the turnos.
+
+### P4b-i
+
+| File | Change |
+| --- | --- |
+| `frontend/src/lib/secretary/demo-data.ts` | `diasDeLaSemana` and `fechasDeLaSemana(fecha)`: Monday to Saturday of the week that contains the date |
+| `frontend/src/components/secretary/agenda-grid.tsx` | Week label, day headers and the ten hour rows, with empty cells |
+| `frontend/src/app/(panel)/agenda/page.tsx` | The route, reading the request weekday inside `Suspense` |
+| `frontend/src/components/secretary/panel-sidebar.tsx` | `Agenda` becomes `ready: true` |
+
+### P4b-ii
+
+| File | Change |
+| --- | --- |
+| `frontend/src/components/secretary/status-badge.tsx` | Exports the `estados` tone map the badge already had |
+| `frontend/src/components/secretary/agenda-grid.tsx` | Groups the day's turnos by hour and draws one card per turno inside its cell |
+
+## Specification — P4b-i
+
+**One row per hour, not per minute.** The export positions cards with ad-hoc margins and variable
+heights; real fixtures at 08:00 and 08:30 would overlap. The grid keeps the design's
+`grid-cols-[64px_repeat(6,1fr)]` and its 80px rows, and each hour cell stacks its turnos.
+
+**The week comes from the request.** `fechasDeLaSemana` takes the request date and returns Monday to
+Saturday of that week, so the label, the day numbers and the columns cannot disagree. Sunday closes
+the week that already ended, because the agenda never draws a seventh column.
+
+**The label survives a month boundary.** One month reads "9 al 14 de Noviembre, 2026"; a week that
+crosses a month reads "30 de Octubre al 4 de Noviembre, 2026".
+
+**What this stage does not build**: the previous and next arrows, "Hoy", the Semanal/Diaria switch,
+"Nuevo turno" and the filter strip with its legend. Navigating weeks needs state and a backend, and
+filters plus legend are P5. A control that cannot work is worse than an absent one.
+
+**Horizontal scroll is contained.** Six columns do not fit at 320px, and at 1024 the 17rem sidebar
+leaves about 688px, so the grid scrolls inside its own container with `min-w-[44rem]`. The page
+itself must never scroll sideways.
+
+## Acceptance criteria — P4b-i
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/agenda` builds as a partial
+  prerender.
+- The label reads the current week and the six headers carry the six dates, with today highlighted.
+- Ten hour rows from 08:00 to 17:00.
+- The sidebar lists Agenda as a link and marks it current on `/agenda`.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Acceptance criteria — P4b-ii
+
+- Each day column shows exactly its fixtures: Monday 12, Tuesday 5, Wednesday 4, Thursday 5,
+  Friday 4, Saturday 4, and the number matches what `/panel` says for the current day.
+- Every card sits in the row of its hour, and its tint matches its estado, from the same map the
+  badge uses.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.

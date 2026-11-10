@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 
 const sections = [
   { label: "Inicio", href: "/panel", icon: LayoutGrid, ready: true },
-  { label: "Agenda", href: "/agenda", icon: CalendarDays, ready: false },
+  { label: "Agenda", href: "/agenda", icon: CalendarDays, ready: true },
   { label: "Pacientes", href: "/pacientes", icon: Users, ready: false },
   { label: "Profesionales", href: "/profesionales", icon: Stethoscope, ready: false },
 ]

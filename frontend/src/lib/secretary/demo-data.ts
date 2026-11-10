@@ -103,6 +103,35 @@ export function diaDeLaSemana(fecha: Date): DiaSemana | null {
   return diasPorIndice[fecha.getDay()]
 }
 
+export const diasDeLaSemana: DiaSemana[] = [
+  "lun",
+  "mar",
+  "mie",
+  "jue",
+  "vie",
+  "sab",
+]
+
+export type FechaDeLaSemana = {
+  dia: DiaSemana
+  fecha: Date
+}
+
+/** Monday to Saturday of the week that contains `fecha`. */
+export function fechasDeLaSemana(fecha: Date): FechaDeLaSemana[] {
+  const lunes = new Date(fecha)
+  const indice = fecha.getDay()
+  lunes.setDate(fecha.getDate() - (indice === 0 ? 6 : indice - 1))
+  lunes.setHours(0, 0, 0, 0)
+
+  return diasDeLaSemana.map((dia, offset) => {
+    const delDia = new Date(lunes)
+    delDia.setDate(lunes.getDate() + offset)
+
+    return { dia, fecha: delDia }
+  })
+}
+
 export type ResumenDelDia = {
   total: number
   pendientes: number
