@@ -39,7 +39,8 @@ function PatientWorkspace({ pacientes }: { pacientes: PacienteDelPadron[] }) {
       </div>
       {seleccionado ? (
         <div ref={fichaRef} className="min-w-0 scroll-mt-lg xl:col-span-5">
-          <PatientRecord paciente={seleccionado} />
+          {/* Keyed by the patient: another row starts again on Historial. */}
+          <PatientRecord key={seleccionado.id} paciente={seleccionado} />
         </div>
       ) : null}
     </div>

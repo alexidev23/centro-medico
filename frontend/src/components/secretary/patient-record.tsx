@@ -1,8 +1,15 @@
+"use client"
+
+import { useState } from "react"
+import { PatientDatos } from "@/components/secretary/patient-datos"
 import { PatientHistory } from "@/components/secretary/patient-history"
+import { PatientTabs, type TabDeLaFicha } from "@/components/secretary/patient-tabs"
 import { coberturaDe, type PacienteDelPadron } from "@/lib/secretary/demo-data"
 import { initials } from "@/lib/utils"
 
 function PatientRecord({ paciente }: { paciente: PacienteDelPadron }) {
+  const [tab, setTab] = useState<TabDeLaFicha>("historial")
+
   return (
     <section className="flex flex-col gap-md rounded-xl border border-surface-subtle bg-card p-lg shadow-card">
       <div className="flex items-start gap-md">
@@ -26,7 +33,17 @@ function PatientRecord({ paciente }: { paciente: PacienteDelPadron }) {
         </div>
       </div>
 
-      <PatientHistory proximo={paciente.proximo} />
+      <PatientTabs activo={tab} onCambiar={setTab} />
+
+      {tab === "historial" ? (
+        <div role="tabpanel" id="panel-historial" aria-labelledby="tab-historial">
+          <PatientHistory proximo={paciente.proximo} />
+        </div>
+      ) : (
+        <div role="tabpanel" id="panel-datos" aria-labelledby="tab-datos">
+          <PatientDatos paciente={paciente} />
+        </div>
+      )}
     </section>
   )
 }

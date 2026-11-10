@@ -577,3 +577,43 @@ the table shows. The card is titled "Próximo turno", not "esta semana", so it p
   consultorio and motivo appear.
 - Irene Salas shows `Este paciente no tiene turnos agendados.` instead of a card.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P7-iii
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P7-iii | `frontend/src/components/secretary/patient-tabs.tsx` | The tab bar |
+| P7-iii | `frontend/src/components/secretary/patient-datos.tsx` | The Datos panel |
+| P7-iii | `frontend/src/components/secretary/patient-record.tsx` | Owns the tab and mounts one panel |
+| P7-iii | `frontend/src/components/secretary/patient-workspace.tsx` | Keyed by patient |
+
+## Specification — P7-iii
+
+**Two tabs, both real.** `Historial` and `Datos`. The label is `Historial` and not the export's
+`Historial Turnos`: the content already says turnos, and the longer word eats the width at 320. The
+export's third tab, Notas Secretaría, stays out because its core is a write and there is no backend
+to write to; a third tab that only displays is a different feature, not this one.
+
+**The bar behaves like a tablist.** The active tab is the only one in the tab order, `←` and `→` move
+the selection and the focus, `aria-selected` follows, and each tab points at its panel with
+`aria-controls`/`aria-labelledby`. The inactive panel is not rendered at all, so nothing hidden is
+reachable with the keyboard.
+
+**A change of patient starts again on Historial.** The tab lives in the record and the workspace keys
+the record by patient id, so another row remounts it instead of leaving the secretary on Datos.
+
+**Datos shows what exists.** Birth date with the age, phone, email, home address and coverage, in two
+columns from `sm`. No `#HC`, no digital credencial, no allergies or blood type: same rule as the
+identity card, inventing clinical data is worse than omitting it.
+
+## Acceptance criteria — P7-iii
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/pacientes` is a partial prerender.
+- The served HTML carries the tablist with `Historial` selected, and only the Historial panel; the
+  Datos panel is not in the initial markup.
+- `Datos` shows five labelled fields with the patient's real values (Ana: 14 de julio de 1988 with 38
+  años, 351 482-9912, ana.lucero@example.com, Av. Hipólito Yrigoyen 320, 4° B, OSDE 210).
+- `→` from a focused Historial selects Datos and focuses it; `←` returns. `tabIndex` is `[0,-1]` and
+  then `[-1,0]`.
+- Switching patient while on Datos returns to Historial and the card shows the new patient.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
