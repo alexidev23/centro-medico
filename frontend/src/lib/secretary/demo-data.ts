@@ -16,7 +16,9 @@ export type Paciente = {
   id: string
   nombre: string
   documento: string
-  cobertura: string
+  proveedor: string
+  plan: string | null
+  telefono: string
 }
 
 export type DiaSemana = "lun" | "mar" | "mie" | "jue" | "vie" | "sab"
@@ -41,15 +43,21 @@ export const profesionales: Profesional[] = [
 ]
 
 export const pacientes: Paciente[] = [
-  { id: "pa-1", nombre: "Ana Lucero", documento: "28.442.119", cobertura: "OSDE 210" },
-  { id: "pa-2", nombre: "Bruno Cáceres", documento: "31.208.774", cobertura: "Swiss Medical" },
-  { id: "pa-3", nombre: "Carla Domínguez", documento: "26.905.331", cobertura: "Particular" },
-  { id: "pa-4", nombre: "Diego Ferreyra", documento: "35.771.402", cobertura: "Apross" },
-  { id: "pa-5", nombre: "Elena Bustos", documento: "22.310.587", cobertura: "PAMI" },
-  { id: "pa-6", nombre: "Facundo Molina", documento: "40.118.226", cobertura: "Particular" },
-  { id: "pa-7", nombre: "Gabriela Ponce", documento: "29.564.903", cobertura: "OSDE 310" },
-  { id: "pa-8", nombre: "Hernán Vega", documento: "33.902.448", cobertura: "Apross" },
+  { id: "pa-1", nombre: "Ana Lucero", documento: "28.442.119", proveedor: "OSDE", plan: "210", telefono: "351 482-9912" },
+  { id: "pa-2", nombre: "Bruno Cáceres", documento: "31.208.774", proveedor: "Swiss Medical", plan: "SMG20", telefono: "351 611-3094" },
+  { id: "pa-3", nombre: "Carla Domínguez", documento: "26.905.331", proveedor: "Particular", plan: null, telefono: "351 455-7720" },
+  { id: "pa-4", nombre: "Diego Ferreyra", documento: "35.771.402", proveedor: "Apross", plan: null, telefono: "351 470-2286" },
+  { id: "pa-5", nombre: "Elena Bustos", documento: "22.310.587", proveedor: "PAMI", plan: null, telefono: "351 463-1187" },
+  { id: "pa-6", nombre: "Facundo Molina", documento: "40.118.226", proveedor: "Particular", plan: null, telefono: "351 598-4402" },
+  { id: "pa-7", nombre: "Gabriela Ponce", documento: "29.564.903", proveedor: "OSDE", plan: "310", telefono: "351 505-6631" },
+  { id: "pa-8", nombre: "Hernán Vega", documento: "33.902.448", proveedor: "Apross", plan: null, telefono: "351 447-9058" },
+  { id: "pa-9", nombre: "Irene Salas", documento: "41.772.305", proveedor: "Particular", plan: null, telefono: "351 533-8814" },
 ]
+
+/** A coverage as the secretaría reads it: the provider, and its plan when it has one. */
+export function coberturaDe({ proveedor, plan }: Paciente) {
+  return plan ? `${proveedor} ${plan}` : proveedor
+}
 
 export const turnos: Turno[] = [
   { id: "tu-1", hora: "08:00", dia: "lun", motivo: "Control anual", pacienteId: "pa-1", profesionalId: "pr-1", estado: "atendido" },
@@ -111,6 +119,15 @@ export const diasDeLaSemana: DiaSemana[] = [
   "vie",
   "sab",
 ]
+
+export const etiquetasDia: Record<DiaSemana, string> = {
+  lun: "Lun",
+  mar: "Mar",
+  mie: "Mié",
+  jue: "Jue",
+  vie: "Vie",
+  sab: "Sáb",
+}
 
 export type FechaDeLaSemana = {
   dia: DiaSemana
@@ -216,4 +233,65 @@ function conPacienteYProfesional(turno: Turno): TurnoDelDia {
   }
 
   return { ...turno, paciente, profesional }
+}
+
+export type PacienteDelPadron = Paciente & {
+  proximo: { cuando: string; profesional: string } | null
+}
+
+const diaYMesFormatter = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "short",
+})
+
+/**
+ * "Lun 16 nov, 16:00 hs". Dates are formatted here, on the server, for the same
+ * reason the agenda label is: the browser's timezone must not move a day.
+ */
+function etiquetaDeTurno(fecha: Date, turno: TurnoDelDia, enDias: number) {
+  const delDia = new Date(fecha)
+  delDia.setDate(fecha.getDate() + enDias)
+  const diaYMes = diaYMesFormatter.format(delDia).replace(".", "")
+
+  return `${etiquetasDia[turno.dia]} ${diaYMes}, ${turno.hora} hs`
+}
+
+/**
+ * The directory: every patient with the turno they have next. The fixtures are
+ * one repeating week, so a patient with nothing left this week shows the same
+ * weekday of the next one instead of a blank cell.
+ */
+export function pacientesDelPadron(fecha: Date): PacienteDelPadron[] {
+  // The fixtures skip Sunday, so a weekday is 1..6 and the calendar is 0..6:
+  // that mismatch is why the distance below is counted on the calendar, not on
+  // the list. Sunday has nothing to show, so the week starts tomorrow.
+  const diaDeHoy = fecha.getDay()
+  const desde = diaDeHoy === 0 ? 0 : diaDeHoy - 1
+
+  const yaPaso = (turno: TurnoDelDia) =>
+    turno.estado === "cancelado" || turno.estado === "atendido"
+
+  return pacientes.map((paciente) => {
+    for (let paso = 0; paso < diasDeLaSemana.length; paso += 1) {
+      const indice = (desde + paso) % diasDeLaSemana.length
+      const turno = turnosDelDia(diasDeLaSemana[indice]).find(
+        (candidato) =>
+          candidato.pacienteId === paciente.id && !yaPaso(candidato),
+      )
+
+      if (turno) {
+        const enDias = (indice + 1 - diaDeHoy + 7) % 7
+
+        return {
+          ...paciente,
+          proximo: {
+            cuando: etiquetaDeTurno(fecha, turno, enDias),
+            profesional: turno.profesional.nombre,
+          },
+        }
+      }
+    }
+
+    return { ...paciente, proximo: null }
+  })
 }

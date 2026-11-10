@@ -2,8 +2,12 @@
 
 import { useState } from "react"
 import { StatusBadge } from "@/components/secretary/status-badge"
-import { consultorioCorto, type TurnoDelDia } from "@/lib/secretary/demo-data"
-import { cn } from "@/lib/utils"
+import {
+  coberturaDe,
+  consultorioCorto,
+  type TurnoDelDia,
+} from "@/lib/secretary/demo-data"
+import { cn, initials } from "@/lib/utils"
 
 type Filtro = "todos" | "manana" | "tarde" | "en-sala" | "atendidos"
 
@@ -22,9 +26,6 @@ const matchers: Record<Filtro, (turno: TurnoDelDia) => boolean> = {
   "en-sala": (turno) => turno.estado === "en-sala",
   atendidos: (turno) => turno.estado === "atendido",
 }
-
-const initials = (nombre: string) =>
-  nombre.split(" ").slice(0, 2).map((part) => part[0]).join("").toUpperCase()
 
 const cell = "px-3 py-4 align-top"
 
@@ -98,7 +99,7 @@ function TodayTurnos({ turnos }: { turnos: TurnoDelDia[] }) {
                   </td>
                   <td className={cn(cell, "hidden xl:table-cell")}>
                     <span className="inline-block rounded-md bg-surface-subtle px-2.5 py-1 text-label-sm font-medium whitespace-nowrap text-fg-secondary">
-                      {turno.paciente.cobertura}
+                      {coberturaDe(turno.paciente)}
                     </span>
                   </td>
                   <td className={cell}>

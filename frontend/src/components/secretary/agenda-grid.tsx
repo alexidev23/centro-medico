@@ -8,20 +8,12 @@ import {
   type FiltrosAgenda,
 } from "@/components/secretary/agenda-filtros"
 import { estados } from "@/components/secretary/status-badge"
-import type {
-  DiaSemana,
-  TurnoDelDia,
+import {
+  etiquetasDia,
+  type DiaSemana,
+  type TurnoDelDia,
 } from "@/lib/secretary/demo-data"
 import { cn } from "@/lib/utils"
-
-const etiquetasDia: Record<DiaSemana, string> = {
-  lun: "Lun",
-  mar: "Mar",
-  mie: "Mié",
-  jue: "Jue",
-  vie: "Vie",
-  sab: "Sáb",
-}
 
 const horas = Array.from({ length: 10 }, (_, indice) =>
   `${String(8 + indice).padStart(2, "0")}:00`,
