@@ -2,7 +2,6 @@ import { CalendarDays } from "lucide-react"
 import { estados } from "@/components/secretary/status-badge"
 import {
   type DiaSemana,
-  type FechaDeLaSemana,
   type TurnoDelDia,
   turnosDelDia,
 } from "@/lib/secretary/demo-data"
@@ -21,23 +20,9 @@ const horas = Array.from({ length: 10 }, (_, indice) =>
   `${String(8 + indice).padStart(2, "0")}:00`,
 )
 
-const mesFormatter = new Intl.DateTimeFormat("es-AR", { month: "long" })
-
-const capitalizar = (texto: string) =>
-  texto.charAt(0).toUpperCase() + texto.slice(1)
-
-function semanaLabel(fechas: FechaDeLaSemana[]) {
-  const primero = fechas[0].fecha
-  const ultimo = fechas[fechas.length - 1].fecha
-  const mesPrimero = capitalizar(mesFormatter.format(primero))
-  const mesUltimo = capitalizar(mesFormatter.format(ultimo))
-  const anio = ultimo.getFullYear()
-
-  if (primero.getMonth() === ultimo.getMonth()) {
-    return `${primero.getDate()} al ${ultimo.getDate()} de ${mesPrimero}, ${anio}`
-  }
-
-  return `${primero.getDate()} de ${mesPrimero} al ${ultimo.getDate()} de ${mesUltimo}, ${anio}`
+export type DiaDeAgenda = {
+  dia: DiaSemana
+  numero: number
 }
 
 /** Hour bucket of a turno: 08:30 belongs to the 08:00 row. */
@@ -79,13 +64,15 @@ function TurnoCelda({ turno }: { turno: TurnoDelDia }) {
 }
 
 function AgendaGrid({
-  fechas,
+  label,
+  dias,
   hoy,
 }: {
-  fechas: FechaDeLaSemana[]
+  label: string
+  dias: DiaDeAgenda[]
   hoy: DiaSemana | null
 }) {
-  const porDia = fechas.map(({ dia }) => agruparPorHora(turnosDelDia(dia)))
+  const porDia = dias.map(({ dia }) => agruparPorHora(turnosDelDia(dia)))
 
   return (
     <section className="flex flex-col gap-lg">
@@ -93,7 +80,7 @@ function AgendaGrid({
         <div className="flex items-center gap-sm rounded-xl border border-surface-subtle bg-card px-md py-sm shadow-card">
           <CalendarDays className="size-5 shrink-0 text-primary" aria-hidden="true" />
           <h1 className="text-title-md font-semibold tracking-tight text-foreground">
-            {semanaLabel(fechas)}
+            {label}
           </h1>
         </div>
         <span className="flex items-center gap-1.5 rounded-full bg-surface-subtle px-sm py-1 text-label-sm text-fg-secondary">
@@ -108,7 +95,7 @@ function AgendaGrid({
             <div className="p-sm text-center text-label-sm text-fg-secondary">
               Hora
             </div>
-            {fechas.map(({ dia, fecha }) => (
+            {dias.map(({ dia, numero }) => (
               <div
                 key={dia}
                 className={cn(
@@ -122,7 +109,7 @@ function AgendaGrid({
                     dia === hoy ? "font-bold text-primary" : "text-fg-secondary",
                   )}
                 >
-                  {etiquetasDia[dia]} {fecha.getDate()}
+                  {etiquetasDia[dia]} {numero}
                 </span>
                 <span
                   className={cn(
@@ -130,7 +117,7 @@ function AgendaGrid({
                     dia === hoy ? "font-bold text-primary" : "text-foreground",
                   )}
                 >
-                  {fecha.getDate()}
+                  {numero}
                 </span>
               </div>
             ))}
@@ -144,7 +131,7 @@ function AgendaGrid({
               <div className="px-2 py-1.5 text-right text-label-sm text-fg-secondary">
                 {hora}
               </div>
-              {fechas.map(({ dia }, indice) => (
+              {dias.map(({ dia }, indice) => (
                 <div
                   key={dia}
                   className={cn(

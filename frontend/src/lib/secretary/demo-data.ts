@@ -132,6 +132,29 @@ export function fechasDeLaSemana(fecha: Date): FechaDeLaSemana[] {
   })
 }
 
+const mesFormatter = new Intl.DateTimeFormat("es-AR", { month: "long" })
+
+const capitalizar = (texto: string) =>
+  texto.charAt(0).toUpperCase() + texto.slice(1)
+
+/**
+ * Week label for the grid. It stays on the server so the dates are never
+ * formatted twice in two timezones.
+ */
+export function etiquetaDeSemana(fechas: FechaDeLaSemana[]) {
+  const primero = fechas[0].fecha
+  const ultimo = fechas[fechas.length - 1].fecha
+  const mesPrimero = capitalizar(mesFormatter.format(primero))
+  const mesUltimo = capitalizar(mesFormatter.format(ultimo))
+  const anio = ultimo.getFullYear()
+
+  if (primero.getMonth() === ultimo.getMonth()) {
+    return `${primero.getDate()} al ${ultimo.getDate()} de ${mesPrimero}, ${anio}`
+  }
+
+  return `${primero.getDate()} de ${mesPrimero} al ${ultimo.getDate()} de ${mesUltimo}, ${anio}`
+}
+
 export type ResumenDelDia = {
   total: number
   pendientes: number
