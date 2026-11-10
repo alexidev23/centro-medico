@@ -199,14 +199,21 @@ export function turnosDelDia(dia: DiaSemana): TurnoDelDia[] {
   return turnos
     .filter((turno) => turno.dia === dia)
     .sort((a, b) => a.hora.localeCompare(b.hora))
-    .map((turno) => {
-      const paciente = pacientePorId.get(turno.pacienteId)
-      const profesional = profesionalPorId.get(turno.profesionalId)
+    .map(conPacienteYProfesional)
+}
 
-      if (!paciente || !profesional) {
-        throw new Error(`Turno ${turno.id} points to a missing id`)
-      }
+/** Every turno of the week, in day and hour order. */
+export function turnosDeLaSemana(): TurnoDelDia[] {
+  return diasDeLaSemana.flatMap(turnosDelDia)
+}
 
-      return { ...turno, paciente, profesional }
-    })
+function conPacienteYProfesional(turno: Turno): TurnoDelDia {
+  const paciente = pacientePorId.get(turno.pacienteId)
+  const profesional = profesionalPorId.get(turno.profesionalId)
+
+  if (!paciente || !profesional) {
+    throw new Error(`Turno ${turno.id} points to a missing id`)
+  }
+
+  return { ...turno, paciente, profesional }
 }

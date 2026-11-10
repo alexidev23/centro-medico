@@ -6,6 +6,7 @@ import {
   diaDeLaSemana,
   etiquetaDeSemana,
   fechasDeLaSemana,
+  turnosDeLaSemana,
 } from "@/lib/secretary/demo-data"
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ async function AgendaSemanal() {
         numero: delDia.getDate(),
       }))}
       hoy={diaDeLaSemana(fecha)}
+      turnos={turnosDeLaSemana()}
     />
   )
 }

@@ -1,9 +1,16 @@
+"use client"
+
+import { useState } from "react"
 import { CalendarDays } from "lucide-react"
-import { estados } from "@/components/secretary/status-badge"
 import {
-  type DiaSemana,
-  type TurnoDelDia,
-  turnosDelDia,
+  AgendaFiltros,
+  filtrosVacios,
+  type FiltrosAgenda,
+} from "@/components/secretary/agenda-filtros"
+import { estados } from "@/components/secretary/status-badge"
+import type {
+  DiaSemana,
+  TurnoDelDia,
 } from "@/lib/secretary/demo-data"
 import { cn } from "@/lib/utils"
 
@@ -67,12 +74,28 @@ function AgendaGrid({
   label,
   dias,
   hoy,
+  turnos,
 }: {
   label: string
   dias: DiaDeAgenda[]
   hoy: DiaSemana | null
+  turnos: TurnoDelDia[]
 }) {
-  const porDia = dias.map(({ dia }) => agruparPorHora(turnosDelDia(dia)))
+  const [filtros, setFiltros] = useState<FiltrosAgenda>(filtrosVacios)
+
+  const visibles = turnos.filter(
+    (turno) =>
+      (filtros.profesionalId === "todos" ||
+        turno.profesionalId === filtros.profesionalId) &&
+      (filtros.especialidad === "todas" ||
+        turno.profesional.especialidad === filtros.especialidad) &&
+      (filtros.consultorio === "todos" ||
+        turno.profesional.consultorio === filtros.consultorio),
+  )
+
+  const porDia = dias.map(({ dia }) =>
+    agruparPorHora(visibles.filter((turno) => turno.dia === dia)),
+  )
 
   return (
     <section className="flex flex-col gap-lg">
@@ -88,6 +111,14 @@ function AgendaGrid({
           Modo demo
         </span>
       </div>
+
+      <AgendaFiltros filtros={filtros} onChange={setFiltros} />
+
+      {visibles.length === 0 ? (
+        <p className="rounded-xl border border-surface-subtle bg-card p-lg text-center text-body-md text-fg-secondary shadow-card">
+          No hay turnos con este filtro.
+        </p>
+      ) : null}
 
       <div className="overflow-x-auto rounded-xl border border-surface-subtle bg-card shadow-card">
         <div className="min-w-[44rem]">
