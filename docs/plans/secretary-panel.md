@@ -1,7 +1,7 @@
 # Stage P — Secretary panel
 
 **Branch:** `feat/secretary-panel`
-**Status:** roadmap approved, P1 in progress
+**Status:** P1 shipped (`1623322`), P2 in progress
 **Depends on:** `main` at `c8219a1` (B5c)
 
 ## Objective
@@ -114,3 +114,48 @@ actualice."*
 - No "en tiempo real", "Base actualizada" or live-presence string exists.
 - CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: no horizontal overflow, empty
   console, `/panel` reachable from `/ingreso` and back.
+
+## Scope — P2
+
+| File | Change |
+| --- | --- |
+| `frontend/src/lib/secretary/demo-data.ts` | New — types, fixtures and the summary of the day |
+| `frontend/src/components/secretary/kpi-card.tsx` | New — one metric card with an icon and a footnote |
+| `frontend/src/app/(panel)/panel/page.tsx` | The four cards, under the head |
+
+## Specification — P2
+
+**One dataset for the whole panel.** `demo-data.ts` holds six professionals, eight patients and
+twelve turnos of the day, related by id and nothing else. Every screen reads from it, so the
+dashboard, the agenda and the directory cannot disagree about the same patient. The module is the
+only place the fixtures live; no screen retypes a name or a count.
+
+**States.** A turno is `pendiente`, `confirmado`, `en-sala`, `atendido` or `cancelado`. The
+dashboard counts them; it does not invent a state the agenda cannot show later.
+
+**Derived counters.** The cards read `resumenDelDia()` — `turnos.filter(...)` over that dataset —
+so changing a fixture moves the number. The first and last hour of the day come from the same
+list.
+
+**The four cards.** `Turnos de hoy` (total, `CalendarCheck`), `Pendientes de confirmar` (amber,
+`Hourglass`), `Cancelaciones de hoy` (red, `CalendarX`) and `Atendidos` (`UserCheck`). Each card is
+a white surface with `shadow-card`, the label above, the count in `text-display` and a footnote
+below. The footnote states something true about the dataset — the hour range, the count over the
+total — and never a comparison against yesterday, an occupancy percentage or an action button,
+because there is nothing behind them.
+
+**The design's fourth card does not ship.** *"Pacientes nuevos del mes"* with *"+12% vs mes
+anterior"* needs a month of history that no fixture has; `Atendidos` replaces it.
+
+**No new colours.** The tones use the existing `status-pending-*`, `status-cancelled-*` and
+`status-confirmed-*` tokens from `globals.css`. Nothing is hardcoded outside that file.
+
+## Acceptance criteria — P2
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0.
+- The four cards show 12 / 3 / 2 / 4, which are the counts in the fixture module; editing one
+  turno's state changes the matching number on the next build.
+- No card shows a percentage, a comparison with yesterday, or a button.
+- The grid is one column at 320, two from `sm` and four from `xl`, with no horizontal overflow.
+- CDP probe at 320 / 390 / 768 / 1024 / 1280 with `mobile:false`: the four cards are visible, the
+  console is empty and the document never scrolls sideways.
