@@ -20,4 +20,4 @@ function StatusBadge({ estado }: { estado: TurnoEstado }) {
   )
 }
 
-export { StatusBadge }
+export { StatusBadge, estados }

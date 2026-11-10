@@ -1,7 +1,10 @@
 import { CalendarDays } from "lucide-react"
+import { estados } from "@/components/secretary/status-badge"
 import {
   type DiaSemana,
   type FechaDeLaSemana,
+  type TurnoDelDia,
+  turnosDelDia,
 } from "@/lib/secretary/demo-data"
 import { cn } from "@/lib/utils"
 
@@ -37,6 +40,44 @@ function semanaLabel(fechas: FechaDeLaSemana[]) {
   return `${primero.getDate()} de ${mesPrimero} al ${ultimo.getDate()} de ${mesUltimo}, ${anio}`
 }
 
+/** Hour bucket of a turno: 08:30 belongs to the 08:00 row. */
+const horaDeFila = (hora: string) => `${hora.slice(0, 2)}:00`
+
+function agruparPorHora(turnos: TurnoDelDia[]) {
+  const porHora: Record<string, TurnoDelDia[]> = {}
+
+  for (const turno of turnos) {
+    const fila = horaDeFila(turno.hora)
+    porHora[fila] = [...(porHora[fila] ?? []), turno]
+  }
+
+  return porHora
+}
+
+function TurnoCelda({ turno }: { turno: TurnoDelDia }) {
+  const tono = estados[turno.estado]
+
+  return (
+    <div className={cn("rounded-lg px-2 py-1.5", tono.pill)}>
+      <span className="flex items-center justify-between gap-1">
+        <span
+          className="truncate text-label-sm font-bold"
+          title={`${turno.hora} · ${turno.paciente.nombre} · ${tono.label}`}
+        >
+          {turno.hora} · {turno.paciente.nombre}
+        </span>
+        <span
+          className={cn("size-2 shrink-0 rounded-full", tono.dot)}
+          aria-hidden="true"
+        />
+      </span>
+      <span className="block truncate text-body-sm" title={turno.motivo}>
+        {turno.motivo}
+      </span>
+    </div>
+  )
+}
+
 function AgendaGrid({
   fechas,
   hoy,
@@ -44,6 +85,8 @@ function AgendaGrid({
   fechas: FechaDeLaSemana[]
   hoy: DiaSemana | null
 }) {
+  const porDia = fechas.map(({ dia }) => agruparPorHora(turnosDelDia(dia)))
+
   return (
     <section className="flex flex-col gap-lg">
       <div className="flex flex-wrap items-center justify-between gap-md">
@@ -101,14 +144,18 @@ function AgendaGrid({
               <div className="px-2 py-1.5 text-right text-label-sm text-fg-secondary">
                 {hora}
               </div>
-              {fechas.map(({ dia }) => (
+              {fechas.map(({ dia }, indice) => (
                 <div
                   key={dia}
                   className={cn(
-                    "min-h-20 min-w-0 border-l border-surface-subtle p-1.5",
+                    "flex min-h-20 min-w-0 flex-col gap-1 border-l border-surface-subtle p-1.5",
                     dia === hoy && "bg-primary-subtle/40",
                   )}
-                />
+                >
+                  {(porDia[indice][hora] ?? []).map((turno) => (
+                    <TurnoCelda key={turno.id} turno={turno} />
+                  ))}
+                </div>
               ))}
             </div>
           ))}
