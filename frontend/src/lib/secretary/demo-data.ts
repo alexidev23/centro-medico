@@ -199,6 +199,37 @@ export function resumenDelDia(dia: DiaSemana): ResumenDelDia {
   }
 }
 
+export type ResumenDelCuerpo = {
+  profesionales: number
+  especialidades: number
+  consultorios: number
+  turnosDeHoy: number
+  atendidosHoy: number
+  enEsperaHoy: number
+  pendientesHoy: number
+}
+
+/**
+ * The headline numbers of the staff screen, counted from the same fixtures the
+ * agenda and the directory read, so the summary cannot disagree with them.
+ */
+export function resumenDelCuerpoProfesional(fecha: Date): ResumenDelCuerpo {
+  const dia = diaDeLaSemana(fecha)
+  const deHoy = dia === null ? [] : turnosDelDia(dia)
+  const contar = (...estados: TurnoEstado[]) =>
+    deHoy.filter((turno) => estados.includes(turno.estado)).length
+
+  return {
+    profesionales: profesionales.length,
+    especialidades: new Set(profesionales.map((uno) => uno.especialidad)).size,
+    consultorios: new Set(profesionales.map((uno) => uno.consultorio)).size,
+    turnosDeHoy: deHoy.length,
+    atendidosHoy: contar("atendido"),
+    enEsperaHoy: contar("confirmado", "en-sala"),
+    pendientesHoy: contar("pendiente"),
+  }
+}
+
 export type TurnoDelDia = Turno & {
   paciente: Paciente
   profesional: Profesional

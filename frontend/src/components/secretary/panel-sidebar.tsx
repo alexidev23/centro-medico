@@ -15,7 +15,7 @@ const sections = [
   { label: "Inicio", href: "/panel", icon: LayoutGrid, ready: true },
   { label: "Agenda", href: "/agenda", icon: CalendarDays, ready: true },
   { label: "Pacientes", href: "/pacientes", icon: Users, ready: true },
-  { label: "Profesionales", href: "/profesionales", icon: Stethoscope, ready: false },
+  { label: "Profesionales", href: "/profesionales", icon: Stethoscope, ready: true },
 ]
 
 const itemClassName =

@@ -654,3 +654,59 @@ semana."
 - Every row carries the professional and a real state pill.
 - Irene Salas shows no list and no list heading.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+# P8 — Cuerpo profesional y consultorios
+
+The design draws twelve professionals, staffing photos, a 83% room occupancy and a "Registrar
+profesional" form. None of that exists here: six professionals in the fixtures, no assets and no
+backend to write a new one. The screen is built from what the fixtures can prove, and it is split so
+each stage stays reviewable:
+
+| Stage | Content |
+| --- | --- |
+| P8-i | Route, header, the three real numbers, sidebar enabled |
+| P8-ii | The card grid |
+| P8-iii | Search and specialty chips |
+| P8-iv | Physical distribution of the consultorios |
+
+## Scope — P8-i
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P8-i | `frontend/src/lib/secretary/demo-data.ts` | `resumenDelCuerpoProfesional()` |
+| P8-i | `frontend/src/app/(panel)/profesionales/page.tsx` | The route, with `connection()` and Suspense |
+| P8-i | `frontend/src/components/secretary/professionals-header.tsx` | Eyebrow, title, subtitle, link to the agenda |
+| P8-i | `frontend/src/components/secretary/professionals-summary.tsx` | The three `KpiCard`s |
+| P8-i | `frontend/src/components/secretary/panel-sidebar.tsx` | Profesionales stops being disabled |
+
+## Specification — P8-i
+
+**Three numbers, all counted.** `resumenDelCuerpoProfesional()` reads the same `profesionales` and
+`turnosDelDia()` the agenda and the directory already read: 6 specialists, 6 distinct consultorios, and
+today's five turnos split into 2 atendidos, 2 en espera and 1 pendiente. The design's `83%` is dropped
+because room occupancy needs a capacity no fixture declares, and the design's `74 turnos` is the
+capture's number, not this week's.
+
+**The eyebrow prints the real year.** The design says "Gestión 2025" and today is 2026, so the header
+takes the year from the request date instead of hardcoding a stale one.
+
+**The only button is a real route.** "Vista Grilla de Turnos" becomes a link to `/agenda`, which
+exists. "Registrar profesional" is not built: it is a form that writes, and there is nowhere to write.
+
+**Counted notes agree with themselves.** `contar()` keeps singular and plural honest, so a day with
+one pending turno reads "1 pendiente", not "1 pendientes".
+
+**The sidebar stops lying.** `Profesionales` was the last section marked `ready: false`; the route now
+exists, so it becomes a link and marks itself with `aria-current="page"`.
+
+## Acceptance criteria — P8-i
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/profesionales` is a partial prerender.
+- The served HTML carries the eyebrow with `Gestión 2026`, the `h1`, the subtitle, and the three cards
+  reading 6 / 6 / 5 with their notes (`6 especialidades…`, `Todos con agenda esta semana`,
+  `2 atendidos • 2 en espera • 1 pendiente`).
+- "Vista Grilla de Turnos" is an `a[href="/agenda"]` inside `main`, and clicking it lands on `/agenda`.
+- The sidebar renders exactly one `a[href="/profesionales"]`, with `aria-current="page"`, and leaves no
+  `aria-disabled` section behind.
+- No "Registrar profesional" anywhere in the served HTML.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
