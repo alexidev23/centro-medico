@@ -843,3 +843,38 @@ stage brings; `Más filtros` is not built, because there are no further filters 
 - A search that matches nothing inside a selected specialty shows the message instead of the grid.
 - `/pacientes` still renders its rows and its search input.
 - No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — P8-iv
+
+| Stage | File | Change |
+| --- | --- | --- |
+| P8-iv | `frontend/src/components/secretary/consultorios-distribution.tsx` | **New**: the physical distribution panel |
+| P8-iv | `frontend/src/components/secretary/professionals-directory.tsx` | A second chip group that filters by floor |
+| P8-iv | `frontend/src/app/(panel)/profesionales/page.tsx` | The panel under the grid |
+
+## Specification — P8-iv
+
+**The panel is the design's, with this sede's numbers.** One row with a building icon, the title, and a
+subtitle reading "Sede Nueva Córdoba • 6 consultorios equipados", then the rooms of each floor:
+`Planta Baja: Cons. 1, 2, 5` and `Planta Alta: Cons. 3, 4, 6`. Every room and every floor comes from
+the `consultorios` fixture, the same one the cards read their planta from, so the panel cannot list a
+room the grid does not use. The design prints eight rooms (1, 2, 5 and 3, 4, 6, 7, 8); there are six.
+
+**No invented address, no dead download.** The design prints the sede's street address and a
+"Descargar plano" link. No fixture declares the address and there is no plan file, so neither is built:
+a link that downloads nothing is worse than no link.
+
+**The floor filter is real.** `Planta:` groups three chips whose counts come from the grid itself —
+`Todas 6`, `Baja 3`, `Alta 3` — and combines with the specialty chips and the search instead of
+replacing them. The design shows a static "Planta: Todos" badge; this is the filter behind it.
+
+## Acceptance criteria — P8-iv
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/profesionales` is a partial prerender.
+- The panel reads "6 consultorios equipados", `Planta Baja: Cons. 1, 2, 5` and
+  `Planta Alta: Cons. 3, 4, 6`, with no street address and no "Descargar plano".
+- `Planta:` chips read `Todas 6 / Baja 3 / Alta 3`; `Alta` leaves Salguero, Paz and Quiroga; `Baja`
+  leaves Ferrero, Iturbe and Ledesma.
+- `Alta` plus the `Cardiología` chip leaves only Salguero; adding a search that matches nothing shows
+  the message; clearing everything restores the six cards with `Todas` active again.
+- No page-level horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.

@@ -3,7 +3,9 @@
 import { useState, type ReactNode } from "react"
 import { Search, X } from "lucide-react"
 import { ProfessionalCard } from "@/components/secretary/professional-card"
-import type { ProfesionalDelCuerpo } from "@/lib/secretary/demo-data"
+import type { Planta, ProfesionalDelCuerpo } from "@/lib/secretary/demo-data"
+
+const plantas: Planta[] = ["Baja", "Alta"]
 
 const normalizar = (texto: string) =>
   texto
@@ -25,7 +27,7 @@ function coincide(profesional: ProfesionalDelCuerpo, consulta: string) {
   ].some((campo) => alfanumerico(campo).includes(buscado))
 }
 
-function ChipEspecialidad({
+function ChipFiltro({
   activo,
   conteo,
   onClick,
@@ -63,11 +65,13 @@ function ChipEspecialidad({
 function ProfessionalsDirectory({ cuerpo }: { cuerpo: ProfesionalDelCuerpo[] }) {
   const [consulta, setConsulta] = useState("")
   const [especialidad, setEspecialidad] = useState("todas")
+  const [planta, setPlanta] = useState<Planta | "todas">("todas")
 
   const especialidades = [...new Set(cuerpo.map((uno) => uno.especialidad))]
   const visibles = cuerpo.filter(
     (uno) =>
       (especialidad === "todas" || uno.especialidad === especialidad) &&
+      (planta === "todas" || uno.planta === planta) &&
       coincide(uno, consulta),
   )
 
@@ -107,22 +111,47 @@ function ProfessionalsDirectory({ cuerpo }: { cuerpo: ProfesionalDelCuerpo[] }) 
           aria-label="Filtrar por especialidad"
           className="flex flex-wrap items-center gap-2"
         >
-          <ChipEspecialidad
+          <ChipFiltro
             activo={especialidad === "todas"}
             conteo={cuerpo.length}
             onClick={() => setEspecialidad("todas")}
           >
             Todas
-          </ChipEspecialidad>
+          </ChipFiltro>
           {especialidades.map((nombre) => (
-            <ChipEspecialidad
+            <ChipFiltro
               key={nombre}
               activo={especialidad === nombre}
               conteo={cuerpo.filter((uno) => uno.especialidad === nombre).length}
               onClick={() => setEspecialidad(nombre)}
             >
               {nombre}
-            </ChipEspecialidad>
+            </ChipFiltro>
+          ))}
+        </div>
+
+        <div
+          role="group"
+          aria-label="Filtrar por planta"
+          className="flex flex-wrap items-center gap-2"
+        >
+          <span className="mr-1 text-label-sm text-fg-secondary">Planta:</span>
+          <ChipFiltro
+            activo={planta === "todas"}
+            conteo={cuerpo.length}
+            onClick={() => setPlanta("todas")}
+          >
+            Todas
+          </ChipFiltro>
+          {plantas.map((una) => (
+            <ChipFiltro
+              key={una}
+              activo={planta === una}
+              conteo={cuerpo.filter((uno) => uno.planta === una).length}
+              onClick={() => setPlanta(una)}
+            >
+              {una}
+            </ChipFiltro>
           ))}
         </div>
       </section>
