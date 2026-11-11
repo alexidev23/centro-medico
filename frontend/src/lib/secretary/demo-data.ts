@@ -379,7 +379,7 @@ function fechaDelTurno(fecha: Date, enDias: number) {
  * "Lun 16 nov, 16:00 hs". Dates are formatted here, on the server, for the same
  * reason the agenda label is: the browser's timezone must not move a day.
  */
-function etiquetaDeTurno(delDia: Date, turno: TurnoDelDia) {
+function etiquetaDeTurno(delDia: Date, turno: Pick<Turno, "dia" | "hora">) {
   const diaYMes = diaYMesFormatter.format(delDia).replace(".", "")
 
   return `${etiquetasDia[turno.dia]} ${diaYMes}, ${turno.hora} hs`
@@ -477,6 +477,62 @@ export function pacientesDelPadron(fecha: Date): PacienteDelPadron[] {
 
     return { ...paciente, edad, nacimientoTexto, semana, proximo: null }
   })
+}
+
+export type TurnoDelPaciente = ProximoTurno & {
+  /** `true` when the state says the turno already happened. */
+  fue: boolean
+}
+
+/**
+ * Every turno the patient has, placed on the correct side of today: the state
+ * says whether it happened, the weekday only says which day. The fixtures are
+ * one repeating week written without a calendar, so an `atendido` slot always
+ * lands in the past and a `pendiente` one never lands there.
+ */
+export function turnosDelPaciente(
+  pacienteId: string,
+  fecha: Date,
+): TurnoDelPaciente[] {
+  const hoy = new Date(fecha)
+  hoy.setHours(0, 0, 0, 0)
+  // The sede is closed on Sunday, so a weekday is 1..6 and the calendar 0..6.
+  const indiceHoy = hoy.getDay()
+
+  return turnos
+    .filter((turno) => turno.pacienteId === pacienteId)
+    .map((turno) => {
+      const fue = turno.estado === "atendido" || turno.estado === "cancelado"
+      let delta = diasDeLaSemana.indexOf(turno.dia) + 1 - indiceHoy
+
+      if (fue && delta > 0) delta -= 7
+      if (!fue && delta < 0) delta += 7
+
+      const delDia = fechaDelTurno(hoy, delta)
+      const profesional = profesionalPorId.get(turno.profesionalId)
+
+      if (!profesional) {
+        throw new Error(`Turno ${turno.id} points to a missing id`)
+      }
+
+      return {
+        id: turno.id,
+        fecha: fechaIso(delDia),
+        cuando: etiquetaDeTurno(delDia, turno),
+        profesional: profesional.nombre,
+        dia: fechaLarga(delDia),
+        hora: `${turno.hora} hs`,
+        especialidad: profesional.especialidad,
+        consultorio: profesional.consultorio,
+        motivo: turno.motivo,
+        estado: turno.estado,
+        fue,
+      }
+    })
+    .sort(
+      (a, b) =>
+        a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora),
+    )
 }
 
 export type EstadoDelProfesional = "en-sala" | "con-turnos" | "sin-turnos"

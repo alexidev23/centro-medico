@@ -1,7 +1,7 @@
 # Stage PA — Patient portal
 
 **Branch:** `feat/patient-portal`
-**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped
+**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped
 **Depends on:** `main` at `4d1bda4` (P8-iv)
 
 ## Objective
@@ -116,3 +116,40 @@ When there is none, it says so instead of printing an empty card.
   `Dermatología · Consultorio 3 · Primera consulta` and the `Pendiente` badge.
 - `Salir` returns to `/`, and `/portal` sends the visitor back to the sign-in.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280 on both screens; console clean.
+
+## Scope — PA-2
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-2 | `frontend/src/lib/secretary/demo-data.ts` | **New**: `turnosDelPaciente()` and `TurnoDelPaciente` |
+| PA-2 | `frontend/src/app/(portal)/portal/page.tsx` | `También tenés` and `Historial de turnos`, over a shared list |
+
+## Specification — PA-2
+
+**The state says whether a turno happened; the weekday only says which day.** The fixtures are one
+repeating week written without a calendar, so a date-only split would print `Sábado 14 · Atendido` as
+if it were ahead and `Martes 17 · Pendiente` as if it were behind. `turnosDelPaciente()` therefore
+places `atendido` and `cancelado` at their most recent past occurrence and `pendiente`, `confirmado`
+and `en-sala` at their next one, both relative to today, and sorts ascending by date and hour.
+
+**The next turno is one card; the rest are a list.** The próximo turno keeps the PA-1b card. Every
+other upcoming turno goes under `También tenés`, sharing one row component with the history: date and
+hour, professional, specialty, room, reason and the `StatusBadge`.
+
+**The history reads newest first.** That is the order a patient looks for, so `turnosDelPaciente()`'s
+ascending order is reversed for the history only. The section states in one line that the history
+covers a week of test data.
+
+**An empty section does not render.** `También tenés` and `Historial de turnos` appear only when they
+have rows; a patient without turnos keeps the `No tenés turnos agendados.` line and nothing else.
+
+## Acceptance criteria — PA-2
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; both portal routes stay dynamic.
+- As Ana Lucero: `Tu próximo turno` reads `Jueves 12 de noviembre`, `12:30 hs · Dr. Ignacio Paz`;
+  `También tenés` lists `Lun 16 nov, 12:00 hs` and `Mar 17 nov, 12:00 hs`; `Historial de turnos` lists
+  `Lun 9 nov, 08:00 hs` then `Sáb 7 nov, 11:00 hs`, newest first, both `Atendido`.
+- The history never prints a future date and `También tenés` never prints a past one.
+- As Hernán Ruiz: the próximo turno reads `En sala` and there is no history section.
+- As Irene Salas: `No tenés turnos agendados.`, with neither of the two new sections.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
