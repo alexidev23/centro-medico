@@ -15,7 +15,7 @@ export default async function PortalIngresoPage() {
   if (await pacienteActual()) redirect("/portal")
 
   return (
-    <div className="flex flex-1 items-center justify-center px-gutter-mobile py-lg md:px-gutter">
+    <div className="flex flex-1 items-center justify-center">
       <PatientLogin />
     </div>
   )

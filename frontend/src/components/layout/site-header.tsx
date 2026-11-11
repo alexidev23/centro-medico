@@ -94,13 +94,13 @@ function SiteHeader() {
             >
               Sacar turno
             </Link>
-            <button
-              type="button"
-              aria-label="Portal del paciente"
+            <Link
+              href="/portal"
+              aria-label="Mi portal"
               className="hidden size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark sm:flex"
             >
-              <User className="size-4" />
-            </button>
+              <User className="size-4" aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </header>

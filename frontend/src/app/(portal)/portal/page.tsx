@@ -1,9 +1,8 @@
 ﻿import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { LogOut } from "lucide-react"
-import { salir } from "@/lib/portal/acciones"
+import { StatusBadge } from "@/components/secretary/status-badge"
 import { pacienteActual } from "@/lib/portal/sesion"
-import { coberturaDe } from "@/lib/secretary/demo-data"
+import { coberturaDe, pacientesDelPadron } from "@/lib/secretary/demo-data"
 
 export const metadata: Metadata = {
   title: "Mi portal · Centro Médico Aurora",
@@ -17,38 +16,81 @@ export default async function PortalPage() {
   const paciente = await pacienteActual()
   if (!paciente) redirect("/portal/ingreso")
 
-  return (
-    <div className="mx-auto flex w-full max-w-[52rem] flex-1 flex-col px-gutter-mobile py-lg md:px-gutter">
-      <div className="flex flex-wrap items-start justify-between gap-sm">
-        <div>
-          <p className="text-label-sm font-semibold tracking-wide text-fg-secondary uppercase">
-            Mi portal
-          </p>
-          <h1 className="mt-1 text-headline-lg font-bold tracking-tight text-foreground">
-            Hola, {paciente.nombre.split(" ")[0]}
-          </h1>
-        </div>
-        <form action={salir}>
-          <button
-            type="submit"
-            className="flex h-10 items-center gap-1.5 rounded-lg px-sm text-label-md text-fg-secondary transition-colors hover:bg-surface-subtle hover:text-foreground"
-          >
-            <LogOut className="size-4" aria-hidden="true" />
-            Salir
-          </button>
-        </form>
-      </div>
+  const proximo =
+    pacientesDelPadron(new Date()).find((uno) => uno.id === paciente.id)
+      ?.proximo ?? null
 
-      <p className="mt-sm max-w-[42rem] text-body-md leading-snug text-fg-secondary">
-        Entraste como {paciente.nombre} · DNI {paciente.documento} ·{" "}
-        {coberturaDe(paciente)}. Acá vas a encontrar tus turnos, tus recetas y
-        tu facturación.
+  const datos = [
+    { label: "Nombre", value: paciente.nombre },
+    { label: "Documento", value: paciente.documento },
+    { label: "Cobertura", value: coberturaDe(paciente) },
+    { label: "Email", value: paciente.email },
+  ]
+
+  return (
+    <>
+      <p className="text-label-sm font-semibold tracking-wide text-fg-secondary uppercase">
+        Mi portal
+      </p>
+      <h1 className="mt-1 text-headline-lg font-bold tracking-tight text-foreground">
+        Hola, {paciente.nombre.split(" ")[0]}
+      </h1>
+      <p className="mt-1 max-w-[42rem] text-body-md leading-snug text-fg-secondary">
+        Acá vas a encontrar tus turnos, tus recetas y tu facturación.
       </p>
 
-      <p className="mt-md max-w-[42rem] rounded-lg bg-surface-subtle p-sm text-body-sm leading-snug text-fg-secondary">
+      <div className="mt-lg grid gap-md lg:grid-cols-[1fr_1.3fr]">
+        <section
+          aria-label="Tus datos"
+          className="rounded-xl border border-surface-subtle bg-card p-md shadow-card"
+        >
+          <h2 className="text-title-md font-semibold tracking-tight text-foreground">
+            Tus datos
+          </h2>
+          <dl className="mt-sm flex flex-col gap-2">
+            {datos.map((dato) => (
+              <div key={dato.label} className="flex flex-col">
+                <dt className="text-label-sm text-fg-secondary">{dato.label}</dt>
+                <dd className="text-body-md break-words text-foreground">{dato.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section
+          aria-label="Tu próximo turno"
+          className="rounded-xl border border-surface-subtle bg-card p-md shadow-card"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-sm">
+            <h2 className="text-title-md font-semibold tracking-tight text-foreground">
+              Tu próximo turno
+            </h2>
+            {proximo ? <StatusBadge estado={proximo.estado} /> : null}
+          </div>
+          {proximo ? (
+            <>
+              <p className="mt-sm text-title-md font-semibold text-foreground">
+                {proximo.dia}
+              </p>
+              <p className="text-body-md text-fg-secondary">
+                {proximo.hora} · {proximo.profesional}
+              </p>
+              <p className="mt-2 text-body-sm text-fg-secondary">
+                {proximo.especialidad} · {proximo.consultorio} · {proximo.motivo}
+              </p>
+            </>
+          ) : (
+            <p className="mt-sm text-body-md text-fg-secondary">
+              No tenés turnos agendados.
+            </p>
+          )}
+        </section>
+      </div>
+
+      <p className="mt-md rounded-lg bg-surface-subtle p-sm text-body-sm leading-snug text-fg-secondary">
         Modo demo: los datos son de prueba y todavía no hay backend que los
         actualice.
       </p>
-    </div>
+    </>
   )
 }

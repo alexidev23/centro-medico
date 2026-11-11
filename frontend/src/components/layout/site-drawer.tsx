@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
-import { CircleHelp, Headset, Home, MapPin, Stethoscope, Users, X } from "lucide-react"
+import { CircleHelp, Headset, Home, MapPin, Stethoscope, UserRound, Users, X } from "lucide-react"
 import { cn } from "cn"
 import { BrandMark } from "@/components/layout/brand-mark"
 
@@ -13,6 +13,7 @@ const navigation = [
   { label: "Cómo funciona", href: "#como-funciona", icon: CircleHelp },
   { label: "Ubicación", href: "#contacto", icon: MapPin },
   { label: "Contacto", href: "#contacto", icon: Headset },
+  { label: "Mi portal", href: "/portal", icon: UserRound },
 ]
 
 function SiteDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {

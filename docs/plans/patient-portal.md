@@ -1,7 +1,7 @@
 # Stage PA — Patient portal
 
 **Branch:** `feat/patient-portal`
-**Status:** PA-1a shipped; PA-1b planned
+**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped
 **Depends on:** `main` at `4d1bda4` (P8-iv)
 
 ## Objective
@@ -78,3 +78,41 @@ they export `instant = false`; there is no shared markup worth streaming before 
 The header icon becomes a `Link` to `/portal` (in mobile it is hidden, so the drawer also gets a
 "Mi portal" entry); a shared shell carries the brand and `Salir`; and the portal page gains the
 identity card and the real próximo turno derived from `pacientesDelPadron()`. ~90 lines.
+
+## Scope — PA-1b
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-1b | `frontend/src/app/(portal)/layout.tsx` | **New**: the shell — brand, `Salir`, the page container |
+| PA-1b | `frontend/src/app/(portal)/portal/page.tsx` | The identity card and the próximo turno card |
+| PA-1b | `frontend/src/app/(portal)/portal/ingreso/page.tsx` | Drops its own container: the shell owns it |
+| PA-1b | `frontend/src/components/layout/site-header.tsx` | The dead person button becomes a link |
+| PA-1b | `frontend/src/components/layout/site-drawer.tsx` | A "Mi portal" entry, since the icon is hidden on mobile |
+
+## Specification — PA-1b
+
+**The door is where the patient looks for it.** The header icon is an `<a href="/portal">`, not a
+button without a handler; on mobile it is `hidden sm:flex`, so the drawer carries the same
+destination. Both point at `/portal` and let the guard decide, so the destination exists once.
+
+**The shell belongs to the whole group.** One header with the brand (a link home) and `Salir`, shown
+only when there is a session — the sign-in screen must not offer to leave a session it does not
+have. One `<main>` container, so the sign-in stays vertically centred inside it.
+
+**The portal carries the patient's real data.** Two cards: the identity (`Nombre`, `Documento`,
+`Cobertura` via `coberturaDe()`, `Email`) and the próximo turno, taken from
+`pacientesDelPadron()`, the same derivation the secretary directory uses. It prints the long date,
+the hour and professional, the specialty, the room and the reason, with the existing `StatusBadge`.
+When there is none, it says so instead of printing an empty card.
+
+## Acceptance criteria — PA-1b
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; both portal routes stay dynamic.
+- On `/`, the person icon is an `a[href="/portal"]`, visible at 1280 and hidden at 390; the drawer
+  lists "Mi portal" pointing at `/portal`.
+- The sign-in renders inside the shell with the brand and without `Salir`.
+- As Ana Lucero, `/portal` reads `Hola, Ana`, `Tus datos` with her document, `OSDE 210` and her
+  email, and `Tu próximo turno` with `Jueves 12 de noviembre`, `12:30 hs · Dr. Ignacio Paz`,
+  `Dermatología · Consultorio 3 · Primera consulta` and the `Pendiente` badge.
+- `Salir` returns to `/`, and `/portal` sends the visitor back to the sign-in.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280 on both screens; console clean.
