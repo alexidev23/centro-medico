@@ -1,7 +1,7 @@
 # Stage PA — Patient portal
 
 **Branch:** `feat/patient-portal`
-**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped (`e4afe73`), PA-3 shipped (`e3636f2`), PA-4 split and shipped
+**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped (`e4afe73`), PA-3 shipped (`e3636f2`), PA-4 split and shipped, PA-5a shipped
 **Depends on:** `main` at `4d1bda4` (P8-iv)
 
 ## Objective
@@ -250,6 +250,55 @@ un comprobante de pago.` No download, print or pay control: there is no receipt 
   `Cubierto por OSDE 210: $ 15.000`.
 - As Carla Domínguez: `Sin cobertura: el honorario completo queda a tu cargo.`, no covered amount.
 - As Hernán Vega and Irene Salas: no `Facturación` section.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Next — PA-5 to PA-9 (the portal as navigation)
+
+The patient asked (2026-11-12) for a header with tabs, one thing per tab, and a home that shows only
+updates: what to pay this month, the próximo turno, and any cancelled turno near today. Tabs are
+**routes**, not client state, so each one has a URL, the back button works, and it reads the session
+on the server. The plan splits into five stages because moving a section counts its lines twice:
+
+| Stage | Deliverable |
+| --- | --- |
+| PA-5a | `/portal/turnos`, and the home drops the turnos sections |
+| PA-5b | The header's tab bar, starting with `Inicio` and `Turnos` |
+| PA-5c | `/portal/recetas` |
+| PA-5d | `/portal/facturacion`, with the coverage heading `Cuenta` |
+| PA-5e | The home as a board: próximo turno, month to pay, cancellations |
+
+The nav lists only tabs that exist, so no stage ships an empty tab.
+
+## Scope — PA-5a
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-5a | `frontend/src/app/(portal)/portal/turnos/page.tsx` | **New**: próximos + historial, moved out of the home |
+| PA-5a | `frontend/src/components/portal/demo-note.tsx` | **New**: the closing demo label, written once |
+| PA-5a | `frontend/src/app/(portal)/portal/page.tsx` | Drops the turnos sections and the row list; the próximo card links to the page |
+
+## Specification — PA-5a
+
+**The turnos get their own address.** `/portal/turnos` carries the próximos and the history that
+used to sit under the próximo card, with the same rows, the same badges and the same order; the page
+guards itself like every portal page.
+
+**The home stops being an archive.** It keeps the greeting, the identity card, the próximo turno,
+the recetas and the facturación, and its próximo card links to `/portal/turnos` so the new page is
+never reachable only by typing the URL. The tab bar arrives in PA-5b; until then the link is the way in.
+
+**The demo label is written once.** `DemoNote` replaces the copy that each page would otherwise
+repeat, so the portal says the same thing on every tab.
+
+## Acceptance criteria — PA-5a
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/portal/turnos` is dynamic (ƒ).
+- Without a session, `/portal/turnos` lands on `/portal/ingreso`.
+- The home no longer prints `Historial de turnos` or `También tenés`; it still prints `Tus recetas`
+  and `Facturación`, and its `Ver todos tus turnos` link points at `/portal/turnos`.
+- As Ana Lucero, `/portal/turnos` lists `Jue 12 nov, 12:30 hs`, `Lun 16 nov, 12:00 hs` and
+  `Mar 17 nov, 12:00 hs`, then the history `Lun 9 nov` before `Sáb 7 nov`.
+- As Irene Salas, `/portal/turnos` says `No tenés turnos agendados.` and shows no history.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
 
 

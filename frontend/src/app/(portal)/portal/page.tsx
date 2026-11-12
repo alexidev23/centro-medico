@@ -1,5 +1,7 @@
 ﻿import type { Metadata } from "next"
+import Link from "next/link"
 import { redirect } from "next/navigation"
+import { DemoNote } from "@/components/portal/demo-note"
 import { StatusBadge } from "@/components/secretary/status-badge"
 import { pacienteActual } from "@/lib/portal/sesion"
 import {
@@ -8,7 +10,6 @@ import {
   pesos,
   recetasDelPaciente,
   turnosDelPaciente,
-  type TurnoDelPaciente,
 } from "@/lib/secretary/demo-data"
 
 export const metadata: Metadata = {
@@ -19,41 +20,13 @@ export const metadata: Metadata = {
 // prerender: the request blocks until the patient is known and redirected.
 export const instant = false
 
-function ListaDeTurnos({ turnos }: { turnos: TurnoDelPaciente[] }) {
-  return (
-    <ul className="flex flex-col">
-      {turnos.map((turno) => (
-        <li
-          key={`${turno.id}-${turno.fecha}`}
-          className="flex flex-wrap items-start justify-between gap-x-sm gap-y-2 border-b border-surface-subtle py-sm last:border-b-0"
-        >
-          <div className="flex min-w-0 flex-col">
-            <span className="text-label-lg font-semibold text-foreground">
-              {turno.cuando}
-            </span>
-            <span className="text-body-sm text-fg-secondary">
-              {turno.profesional} · {turno.especialidad} · {turno.consultorio}
-            </span>
-            <span className="text-body-sm text-fg-secondary">{turno.motivo}</span>
-          </div>
-          <StatusBadge estado={turno.estado} />
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 export default async function PortalPage() {
   const paciente = await pacienteActual()
   if (!paciente) redirect("/portal/ingreso")
 
   const hoy = new Date()
   const turnos = turnosDelPaciente(paciente.id, hoy)
-  const proximos = turnos.filter((turno) => !turno.fue)
-  const proximo = proximos[0] ?? null
-  const otros = proximos.slice(1)
-  // The most recent first: that is what a patient looks for.
-  const historial = turnos.filter((turno) => turno.fue).reverse()
+  const proximo = turnos.find((turno) => !turno.fue) ?? null
   const recetas = recetasDelPaciente(paciente.id, hoy)
   const facturacion = facturacionDelPaciente(paciente.id, hoy)
 
@@ -121,39 +94,14 @@ export default async function PortalPage() {
               No tenés turnos agendados.
             </p>
           )}
+          <Link
+            href="/portal/turnos"
+            className="mt-sm inline-flex text-label-md text-primary underline-offset-4 hover:underline"
+          >
+            Ver todos tus turnos
+          </Link>
         </section>
       </div>
-
-      {otros.length > 0 ? (
-        <section
-          aria-label="Otros próximos turnos"
-          className="mt-md rounded-xl border border-surface-subtle bg-card p-md shadow-card"
-        >
-          <h2 className="text-title-md font-semibold tracking-tight text-foreground">
-            También tenés
-          </h2>
-          <div className="mt-sm">
-            <ListaDeTurnos turnos={otros} />
-          </div>
-        </section>
-      ) : null}
-
-      {historial.length > 0 ? (
-        <section
-          aria-label="Historial de turnos"
-          className="mt-md rounded-xl border border-surface-subtle bg-card p-md shadow-card"
-        >
-          <h2 className="text-title-md font-semibold tracking-tight text-foreground">
-            Historial de turnos
-          </h2>
-          <p className="mt-1 text-body-sm text-fg-secondary">
-            Los turnos que ya pasaron. El historial cubre una semana de prueba.
-          </p>
-          <div className="mt-sm">
-            <ListaDeTurnos turnos={historial} />
-          </div>
-        </section>
-      ) : null}
 
       {recetas.length > 0 ? (
         <section
@@ -272,10 +220,7 @@ export default async function PortalPage() {
         </section>
       ) : null}
 
-      <p className="mt-md rounded-lg bg-surface-subtle p-sm text-body-sm leading-snug text-fg-secondary">
-        Modo demo: los datos son de prueba y todavía no hay backend que los
-        actualice.
-      </p>
+      <DemoNote />
     </>
   )
 }
