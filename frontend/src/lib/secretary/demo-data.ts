@@ -641,6 +641,138 @@ export function recetasDelPaciente(
     }))
 }
 
+/**
+ * What the sede charges per consultation, in pesos, keyed by professional id.
+ * Invented for the demo: the tariff lives with the fixtures, never in the UI.
+ */
+const honorarios = new Map<string, number>([
+  ["pr-1", 12000],
+  ["pr-2", 18000],
+  ["pr-3", 10000],
+  ["pr-4", 14000],
+  ["pr-5", 16000],
+  ["pr-6", 20000],
+])
+
+/**
+ * The fixed amount the patient still pays per consultation. A provider missing
+ * from this table has no coverage: the patient pays the whole honorario.
+ */
+const coseguros = new Map<string, number>([
+  ["OSDE", 4500],
+  ["Swiss Medical", 4000],
+  ["Apross", 3000],
+  ["PAMI", 0],
+])
+
+const pesosFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  maximumFractionDigits: 0,
+})
+
+/** "$ 9.000": formatted here, on the server, like every other label. */
+export function pesos(monto: number) {
+  return pesosFormatter.format(monto)
+}
+
+export type TurnoFacturado = {
+  id: string
+  cuando: string
+  profesional: string
+  especialidad: string
+  motivo: string
+  honorario: number
+  cubierto: number
+  aCargo: number
+}
+
+export type MesFacturado = {
+  /** "2026-11": the key that groups the consultations of one month. */
+  clave: string
+  /** "Noviembre de 2026" */
+  mes: string
+  /** The provider that covered the month; `null` when the patient has none. */
+  cobertura: string | null
+  turnos: TurnoFacturado[]
+  cubierto: number
+  aCargo: number
+}
+
+const mesAnioFormatter = new Intl.DateTimeFormat("es-AR", {
+  month: "long",
+  year: "numeric",
+})
+
+/**
+ * The patient's attended consultations, grouped by month, newest month first.
+ * Only consultations that happened are billed, and the coverage pays the
+ * honorario minus the provider's coseguro; without coverage nothing is paid.
+ */
+export function facturacionDelPaciente(
+  pacienteId: string,
+  fecha: Date,
+): MesFacturado[] {
+  const paciente = pacientePorId.get(pacienteId)
+
+  if (!paciente) {
+    throw new Error(`Unknown patient ${pacienteId}`)
+  }
+
+  const coseguro = coseguros.get(paciente.proveedor)
+  const delTurno = new Map(turnos.map((turno) => [turno.id, turno] as const))
+  const porMes = new Map<string, TurnoFacturado[]>()
+
+  const atendidos = turnosDelPaciente(pacienteId, fecha).filter(
+    (turno) => turno.estado === "atendido",
+  )
+
+  for (const turno of atendidos) {
+    const original = delTurno.get(turno.id)
+    const profesional = original
+      ? profesionalPorId.get(original.profesionalId)
+      : undefined
+    const honorario = original ? honorarios.get(original.profesionalId) : undefined
+
+    if (!profesional || honorario === undefined) {
+      throw new Error(`Turno ${turno.id} has no professional or tariff`)
+    }
+
+    const cubierto =
+      coseguro === undefined ? 0 : Math.max(honorario - coseguro, 0)
+    const clave = turno.fecha.slice(0, 7)
+    const delMes = porMes.get(clave) ?? []
+
+    delMes.push({
+      id: turno.id,
+      cuando: turno.cuando,
+      profesional: profesional.nombre,
+      especialidad: profesional.especialidad,
+      motivo: turno.motivo,
+      honorario,
+      cubierto,
+      aCargo: honorario - cubierto,
+    })
+    porMes.set(clave, delMes)
+  }
+
+  return [...porMes.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([clave, turnosDelMes]) => {
+      const [anio, mes] = clave.split("-").map(Number)
+      const texto = mesAnioFormatter.format(new Date(anio, mes - 1, 1))
+
+      return {
+        clave,
+        mes: capitalizar(texto),
+        cobertura: coseguro === undefined ? null : coberturaDe(paciente),
+        turnos: turnosDelMes,
+        cubierto: turnosDelMes.reduce((total, turno) => total + turno.cubierto, 0),
+        aCargo: turnosDelMes.reduce((total, turno) => total + turno.aCargo, 0),
+      }
+    })
+}
+
 export type EstadoDelProfesional = "en-sala" | "con-turnos" | "sin-turnos"
 
 export type ProfesionalDelCuerpo = Profesional & {
