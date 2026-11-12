@@ -330,4 +330,30 @@ concatenated by hand: `cn()` would read `text-label-md` as a colour and silently
 - `/portal/ingreso` shows no tab bar.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
 
+## Scope — PA-5c
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-5c | `frontend/src/app/(portal)/portal/recetas/page.tsx` | **New**: the recetas page, moved out of the home |
+| PA-5c | `frontend/src/app/(portal)/portal/page.tsx` | Drops the recetas section |
+| PA-5c | `frontend/src/components/portal/portal-nav.tsx` | Adds the `Recetas` tab |
+
+## Specification — PA-5c
+
+**The recetas get an address and a voice of their own.** One card per receta, as before, with the
+page heading saying what the list is: `Una por cada consulta atendida. Emitidas en la demo: no tienen
+validez médica.` The per-section note disappears because the page already carries it once.
+
+**The empty case is a sentence, not a card.** A patient without attended consultations reads
+`Todavía no tenés recetas: aparecen acá cuando una consulta deja una.` Nothing renders a blank list.
+
+## Acceptance criteria — PA-5c
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/portal/recetas` is dynamic (ƒ).
+- As Ana Lucero, `/portal/recetas` lists both recetas, newest first, with `M.P. 34.892` and the demo
+  line; the home no longer prints `Tus recetas`.
+- As Irene Salas, `/portal/recetas` reads the empty sentence.
+- The tab bar lists `Inicio`, `Turnos` and `Recetas`, and marks the current one.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
 

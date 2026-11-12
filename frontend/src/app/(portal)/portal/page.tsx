@@ -8,7 +8,6 @@ import {
   coberturaDe,
   facturacionDelPaciente,
   pesos,
-  recetasDelPaciente,
   turnosDelPaciente,
 } from "@/lib/secretary/demo-data"
 
@@ -27,7 +26,6 @@ export default async function PortalPage() {
   const hoy = new Date()
   const turnos = turnosDelPaciente(paciente.id, hoy)
   const proximo = turnos.find((turno) => !turno.fue) ?? null
-  const recetas = recetasDelPaciente(paciente.id, hoy)
   const facturacion = facturacionDelPaciente(paciente.id, hoy)
 
   const datos = [
@@ -102,56 +100,6 @@ export default async function PortalPage() {
           </Link>
         </section>
       </div>
-
-      {recetas.length > 0 ? (
-        <section
-          aria-label="Tus recetas"
-          className="mt-md rounded-xl border border-surface-subtle bg-card p-md shadow-card"
-        >
-          <h2 className="text-title-md font-semibold tracking-tight text-foreground">
-            Tus recetas
-          </h2>
-          <p className="mt-1 text-body-sm text-fg-secondary">
-            Emitidas en la demo: no tienen validez médica.
-          </p>
-          <ul className="mt-sm flex flex-col gap-sm">
-            {recetas.map((receta) => (
-              <li
-                key={receta.id}
-                className="rounded-lg border border-surface-subtle p-sm"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-x-sm gap-y-1">
-                  <span className="text-label-lg font-semibold text-foreground">
-                    {receta.cuando}
-                  </span>
-                  <span className="text-label-sm text-fg-secondary">
-                    {receta.matricula}
-                  </span>
-                </div>
-                <p className="text-body-sm text-fg-secondary">
-                  {receta.profesional} · {receta.especialidad} · {receta.motivo}
-                </p>
-                <ul className="mt-2 flex flex-col gap-1">
-                  {receta.medicamentos.map((medicamento) => (
-                    <li key={medicamento.nombre} className="text-body-sm">
-                      <span className="font-semibold text-foreground">
-                        {medicamento.nombre}
-                      </span>
-                      <span className="text-fg-secondary">
-                        {" — "}
-                        {medicamento.indicacion}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-body-sm text-fg-secondary">
-                  {receta.indicaciones}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
 
       {facturacion.length > 0 ? (
         <section
