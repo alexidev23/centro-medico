@@ -1,7 +1,7 @@
 # Stage PA — Patient portal
 
 **Branch:** `feat/patient-portal`
-**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped (`e4afe73`), PA-3 shipped
+**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped (`e4afe73`), PA-3 shipped (`e3636f2`), PA-4 split and shipped
 **Depends on:** `main` at `4d1bda4` (P8-iv)
 
 ## Objective
@@ -191,4 +191,65 @@ empty case is silence, not an empty card.
 - No receta prints a future date, and every receta's date matches a turno in the history.
 - As Hernán Vega and Irene Salas: no `Tus recetas` section.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — PA-4a
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-4a | `frontend/src/lib/secretary/demo-data.ts` | **New**: the tariffs, `TurnoFacturado`, `MesFacturado`, `pesos()` and `facturacionDelPaciente()` |
+
+## Specification — PA-4a
+
+**The bill is arithmetic over data that already exists.** The monthly view was chosen over issued
+invoices because an invoice promises a document; a monthly summary is derived from the attended
+consultations, the provider's coverage and a tariff, and invents nothing beyond the numbers.
+
+**Only what happened is billed.** The source is `turnosDelPaciente()` filtered to `atendido`, so a
+pending, confirmed, in-room or cancelled consultation never reaches a bill, and no bill can be dated
+ahead of today. The group key is the month of the turno's placed date, newest month first.
+
+**The tariff lives with the fixtures.** A default honorario per professional, keyed by id — 10.000
+Pediatría up to 20.000 Traumatología — and a fixed coseguro per provider: OSDE 4.500, Swiss Medical
+4.000, Apross 3.000, PAMI 0. A provider missing from that table has no coverage: the patient pays the
+whole honorario, and `cobertura` comes back `null` instead of pretending otherwise.
+
+**Money is formatted on the server.** `pesos()` wraps one `Intl.NumberFormat` for `es-AR`/`ARS`
+without decimals, so the browser's timezone and locale cannot change an amount.
+
+## Acceptance criteria — PA-4a
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0.
+- As Ana Lucero: one month, `Noviembre de 2026`, two consultas, `$ 9.000 a cargo` in total and
+  `Cubierto por OSDE 210: $ 15.000`.
+- As Carla Domínguez (Particular): `$ 22.000 a cargo` in total and `cobertura` `null`.
+- No month contains a turno that has not happened.
+
+## Scope — PA-4b
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-4b | `frontend/src/app/(portal)/portal/page.tsx` | The `Facturación` section, after the recetas |
+
+## Specification — PA-4b
+
+**Each month is a statement.** The month and its consultation count, one row per consultation with
+what the patient owes and what the coverage paid, and a closing block with the month's total and the
+provider that covered it — or `Sin cobertura: el honorario completo queda a tu cargo.` A row only
+shows the covered amount when it is above zero, so a particular patient does not read `$ 0 cubierto`.
+
+**The section says what it is.** Under the heading, fixed: `Montos de demo: no son importes reales ni
+un comprobante de pago.` No download, print or pay control: there is no receipt behind them.
+
+**No coverage, no section.** A patient without attended consultations does not see `Facturación`.
+
+## Acceptance criteria — PA-4b
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; both portal routes stay dynamic.
+- As Ana Lucero: `Facturación` with the demo line, `Noviembre de 2026`, `2 consultas`, two rows of
+  `$ 4.500 a cargo` and `$ 7.500 cubierto`, and `Total del mes: $ 9.000 a cargo` /
+  `Cubierto por OSDE 210: $ 15.000`.
+- As Carla Domínguez: `Sin cobertura: el honorario completo queda a tu cargo.`, no covered amount.
+- As Hernán Vega and Irene Salas: no `Facturación` section.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
 
