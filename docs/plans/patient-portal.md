@@ -1,7 +1,7 @@
 # Stage PA — Patient portal
 
 **Branch:** `feat/patient-portal`
-**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped
+**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped (`e4afe73`), PA-3 shipped
 **Depends on:** `main` at `4d1bda4` (P8-iv)
 
 ## Objective
@@ -153,3 +153,42 @@ have rows; a patient without turnos keeps the `No tenés turnos agendados.` line
 - As Hernán Ruiz: the próximo turno reads `En sala` and there is no history section.
 - As Irene Salas: `No tenés turnos agendados.`, with neither of the two new sections.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — PA-3
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-3 | `frontend/src/lib/secretary/demo-data.ts` | **New**: `Receta`, `Medicamento`, the `recetas` fixture and `recetasDelPaciente()` |
+| PA-3 | `frontend/src/app/(portal)/portal/page.tsx` | The `Tus recetas` section, after the history |
+
+## Specification — PA-3
+
+**A receta hangs from the consultation that emitted it, and has no date of its own.** Each fixture
+entry carries a `turnoId`; the date and the professional come from `turnosDelPaciente()`, the same
+placement PA-2 established. A receta whose turno is not `atendido` — pending, confirmed, in room or
+cancelled — is not shown, so the section can never date a receta in the future.
+
+**The section says what it is.** Under the heading, one fixed line: `Emitidas en la demo: no tienen
+validez médica.` A fake prescription is the most dangerous invented content in this product, and a
+label the patient can only find in a footer is not a label.
+
+**Nothing promises a document.** There is no download, print or send control: there is no file
+behind them, and a control that cannot open anything is the defect this portal keeps refusing.
+
+**Each receta reads like the paper it imitates.** Date and hour, the professional, the specialty and
+the consultation reason, `M.P. {matricula}`, then the medicamentos — name in bold, the indication
+under it — and the general indications. Newest first, like the history.
+
+**No content, no section.** A patient without attended consultations does not see `Tus recetas`; the
+empty case is silence, not an empty card.
+
+## Acceptance criteria — PA-3
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; both portal routes stay dynamic.
+- As Ana Lucero: `Tus recetas` lists `Lun 9 nov, 08:00 hs` with `Ibuprofeno 400 mg` and
+  `Paracetamol 500 mg`, then `Sáb 7 nov, 11:00 hs` with `Vitamina D 25.000 UI`; both read
+  `M.P. 34.892`, `Dra. Lucía Ferrero · Clínica médica · Control anual` and the demo line.
+- No receta prints a future date, and every receta's date matches a turno in the history.
+- As Hernán Vega and Irene Salas: no `Tus recetas` section.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+

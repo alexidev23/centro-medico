@@ -535,6 +535,112 @@ export function turnosDelPaciente(
     )
 }
 
+export type Medicamento = {
+  nombre: string
+  indicacion: string
+}
+
+export type Receta = {
+  id: string
+  /** The `atendido` turno that emitted it: without a consultation there is no receta. */
+  turnoId: string
+  medicamentos: Medicamento[]
+  indicaciones: string
+}
+
+export const recetas: Receta[] = [
+  {
+    id: "re-1",
+    turnoId: "tu-1",
+    medicamentos: [
+      {
+        nombre: "Ibuprofeno 400 mg",
+        indicacion: "1 comprimido cada 8 horas durante 5 días, después de comer.",
+      },
+      {
+        nombre: "Paracetamol 500 mg",
+        indicacion: "1 comprimido cada 6 horas si hay fiebre.",
+      },
+    ],
+    indicaciones:
+      "Reposo relativo por 48 horas. Control en 7 días si el dolor persiste.",
+  },
+  {
+    id: "re-2",
+    turnoId: "tu-33",
+    medicamentos: [
+      {
+        nombre: "Vitamina D 25.000 UI",
+        indicacion: "1 ampolla por semana durante 4 semanas.",
+      },
+    ],
+    indicaciones:
+      "Con el desayuno. Repetir el laboratorio antes de la próxima consulta.",
+  },
+]
+
+export type RecetaDelPaciente = {
+  id: string
+  /** "Lun 9 nov, 08:00 hs" — the consultation that emitted it. */
+  cuando: string
+  profesional: string
+  especialidad: string
+  /** "M.P. 34.892" */
+  matricula: string
+  motivo: string
+  medicamentos: Medicamento[]
+  indicaciones: string
+}
+
+/**
+ * The patient's recetas, each dated by the consultation that emitted it and
+ * never by a date of its own: a receta without an `atendido` turno behind it
+ * does not exist. Newest first, like the history.
+ */
+export function recetasDelPaciente(
+  pacienteId: string,
+  fecha: Date,
+): RecetaDelPaciente[] {
+  const atendidos = new Map(
+    turnosDelPaciente(pacienteId, fecha)
+      .filter((turno) => turno.estado === "atendido")
+      .map((turno) => [turno.id, turno]),
+  )
+
+  const emitidas = recetas.flatMap((receta) => {
+    const turno = atendidos.get(receta.turnoId)
+    if (!turno) return []
+
+    const delTurno = turnos.find((candidato) => candidato.id === receta.turnoId)
+    const profesional = delTurno
+      ? profesionalPorId.get(delTurno.profesionalId)
+      : undefined
+
+    if (!profesional) {
+      throw new Error(`Receta ${receta.id} points to a missing turno`)
+    }
+
+    return [{ receta, turno, profesional }]
+  })
+
+  return emitidas
+    .sort(
+      (a, b) =>
+        b.turno.fecha.localeCompare(a.turno.fecha) ||
+        b.turno.hora.localeCompare(a.turno.hora),
+    )
+    .map(({ receta, turno, profesional }) => ({
+      id: receta.id,
+      cuando: turno.cuando,
+      profesional: profesional.nombre,
+      especialidad: profesional.especialidad,
+      matricula: `M.P. ${profesional.matricula}`,
+      motivo: turno.motivo,
+      medicamentos: receta.medicamentos,
+      indicaciones: receta.indicaciones,
+    }))
+}
+
 export type EstadoDelProfesional = "en-sala" | "con-turnos" | "sin-turnos"
 
 export type ProfesionalDelCuerpo = Profesional & {
