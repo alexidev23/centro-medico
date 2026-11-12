@@ -301,4 +301,33 @@ repeat, so the portal says the same thing on every tab.
 - As Irene Salas, `/portal/turnos` says `No tenés turnos agendados.` and shows no history.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
 
+## Scope — PA-5b
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-5b | `frontend/src/components/portal/portal-nav.tsx` | **New**: the tab bar, as links with the active tab marked |
+| PA-5b | `frontend/src/app/(portal)/layout.tsx` | Renders the nav under the brand, only when there is a session |
+
+## Specification — PA-5b
+
+**Tabs are routes, and the active one is the current path.** `PortalNav` is a client component only
+because it needs `usePathname` to mark the current tab with `aria-current="page"`; every tab is a
+`Link`, so each has a URL, the back button works and the server still renders the page.
+
+**The nav appears only with a session.** It hangs from the shell, and the shell only paints it when
+`pacienteActual()` found a patient, so the sign-in screen has no tabs to press. It grows one tab per
+stage: `Inicio` and `Turnos` now, the rest as their pages land, because a tab without a page is the
+same lie as a button without a handler.
+
+**The active tab is styled without `cn()`.** The base classes and the active/inactive ones are
+concatenated by hand: `cn()` would read `text-label-md` as a colour and silently drop the size.
+
+## Acceptance criteria — PA-5b
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0.
+- With a session, every portal page shows the tab bar with `Inicio` and `Turnos`; the current one
+  carries `aria-current="page"` and the primary colour.
+- `/portal/ingreso` shows no tab bar.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
 

@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import Link from "next/link"
 import { LogOut } from "lucide-react"
 import { BrandMark } from "@/components/layout/brand-mark"
+import { PortalNav } from "@/components/portal/portal-nav"
 import { salir } from "@/lib/portal/acciones"
 import { pacienteActual } from "@/lib/portal/sesion"
 
@@ -30,6 +31,7 @@ export default async function PortalLayout({ children }: { children: ReactNode }
             </form>
           ) : null}
         </div>
+        {paciente ? <PortalNav /> : null}
       </header>
       <main className="mx-auto flex w-full max-w-[52rem] flex-1 flex-col px-gutter-mobile py-lg md:px-gutter">
         {children}
