@@ -118,6 +118,7 @@ export const turnos: Turno[] = [
   { id: "tu-32", hora: "10:00", dia: "sab", motivo: "Primera consulta", pacienteId: "pa-8", profesionalId: "pr-3", estado: "pendiente" },
   { id: "tu-33", hora: "11:00", dia: "sab", motivo: "Control anual", pacienteId: "pa-1", profesionalId: "pr-1", estado: "atendido" },
   { id: "tu-34", hora: "12:00", dia: "sab", motivo: "Primera consulta", pacienteId: "pa-2", profesionalId: "pr-4", estado: "pendiente" },
+  { id: "tu-35", hora: "14:30", dia: "vie", motivo: "Control anual", pacienteId: "pa-1", profesionalId: "pr-2", estado: "cancelado" },
 ]
 
 const diasPorIndice: (DiaSemana | null)[] = [
@@ -771,6 +772,62 @@ export function facturacionDelPaciente(
         aCargo: turnosDelMes.reduce((total, turno) => total + turno.aCargo, 0),
       }
     })
+}
+
+const vencimientoFormatter = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+})
+
+/**
+ * "10 de diciembre de 2026": the bill of a month is due on the 10th of the next
+ * one, computed from the key, so December rolls into the next year on its own.
+ */
+export function vencimientoDe(clave: string) {
+  const [anio, mes] = clave.split("-").map(Number)
+
+  return vencimientoFormatter.format(new Date(anio, mes, 10))
+}
+
+export type CancelacionCercana = {
+  id: string
+  fecha: string
+  cuando: string
+  profesional: string
+  especialidad: string
+  motivo: string
+}
+
+/** How many days back a cancellation still counts as news. */
+const diasDeRecordatorio = 3
+
+/**
+ * The turnos the patient lost in the last few days. The fixture carries no
+ * cancellation timestamp: the turno's own date is the consultation's date, so
+ * "near today" is measured on that date, and a cancellation is never ahead.
+ */
+export function cancelacionesCercanas(
+  pacienteId: string,
+  fecha: Date,
+): CancelacionCercana[] {
+  const desde = new Date(fecha)
+  desde.setHours(0, 0, 0, 0)
+  desde.setDate(desde.getDate() - (diasDeRecordatorio - 1))
+
+  const desdeIso = fechaIso(desde)
+
+  return turnosDelPaciente(pacienteId, fecha)
+    .filter((turno) => turno.estado === "cancelado" && turno.fecha >= desdeIso)
+    .map((turno) => ({
+      id: turno.id,
+      fecha: turno.fecha,
+      cuando: turno.cuando,
+      profesional: turno.profesional,
+      especialidad: turno.especialidad,
+      motivo: turno.motivo,
+    }))
+    .sort((a, b) => b.fecha.localeCompare(a.fecha))
 }
 
 export type EstadoDelProfesional = "en-sala" | "con-turnos" | "sin-turnos"

@@ -395,4 +395,57 @@ behind them.
 - The tab bar lists `Inicio`, `Turnos`, `Recetas` and `Cuenta`, and marks the current one.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
 
+## Scope — PA-5e
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-5e | `frontend/src/lib/secretary/demo-data.ts` | **New**: `vencimientoDe` and `cancelacionesCercanas`, plus one cancelled turno for `pa-1` |
+| PA-5e | `frontend/src/app/(portal)/portal/page.tsx` | The home becomes a board: próximo turno, cuota, cancelaciones; drops `Tus datos` |
+| PA-5e | `frontend/src/app/(portal)/portal/facturacion/page.tsx` | Absorbs `Tus datos` above the billing |
+
+## Specification — PA-5e
+
+**The home shows news, not an archive.** Greeting, then three cards stacked in one column: your next
+turno, what you have to pay this month and the cancelled turnos. The opening sentence reads `Acá ves
+las novedades: tu próximo turno, lo que tenés que pagar y los turnos que se cancelaron.`
+
+**The month to pay is arithmetic over what was already billed.** The card takes the newest month from
+`facturacionDelPaciente()` and prints `Noviembre de 2026`, `$ 9.000 a cargo` and `Vence el 10 de
+diciembre de 2026`, with the link `Ver el detalle` to `/portal/facturacion`. The due date lives in
+`vencimientoDe()`: always the 10th of the month after the billed one, and the year rolls on its own
+(`2026-12` becomes `10 de enero de 2027`). Without consultations the card reads `Todavía no tenés
+consumos para pagar: aparece acá después de tu primera consulta.`
+
+**A cancellation is a reminder with a way out.** `cancelacionesCercanas()` returns the patient's
+`cancelado` turnos whose date fell in the last three days, today included, newest first. The data
+model has no cancellation timestamp: the turno's date is the consultation's date, so "near today" is
+measured on that date, and a cancellation is never ahead. The card is titled `Turnos cancelados`,
+lists `cuando` and `profesional · especialidad · motivo`, and closes with the link `Pedir un turno
+nuevo` to `/#reservar-turno`, the booking section of the site. It does not point at a bare `/reservar`:
+that route needs a `?profesional=` slug and bounces back to the home without one, which would promise
+a booking and deliver the landing. Without near cancellations the card does not render: there is
+nothing to remember.
+
+**Ana sees the case.** Her fixtures had no cancellation at all, so `pa-1` gains a `cancelado` turno on
+Friday 14:30. Accepted consequence: it shows first in her history as `Cancelado`, and the secretary
+agenda counts one more cancellation today. Without that fixture the function would exist and the demo
+would never show it.
+
+**The personal data moves, it is not duplicated.** `Tus datos` leaves the home and appears above the
+billing in `Cuenta`: `Tu cuenta` titles the page, the data follows, then the coverage and the months.
+
+## Acceptance criteria — PA-5e
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/portal` stays dynamic (ƒ).
+- As Ana Lucero: the home prints `Tu próximo turno`, `Noviembre de 2026`, `$ 9.000 a cargo`, `Vence el
+  10 de diciembre de 2026`, `Ver el detalle` and `Turnos cancelados` with `Vie 13 nov, 14:30 hs`; it
+  no longer prints `Tus datos`.
+- As Carla Domínguez: `Turnos cancelados` with `Mié 11 nov`; her home does not print the no-coverage
+  sentence, which stays in the detail.
+- As Irene Salas: the empty-consumption sentence, no cancellation card, no blank list.
+- `Cuenta` prints `Nombre`, `Documento`, `Cobertura` and `Email` above `Noviembre de 2026`.
+- `Ver el detalle` leads to `/portal/facturacion`; `Pedir un turno nuevo` leads to `/#reservar-turno`
+  and lands on the home's booking section, not on a bounced `/reservar`.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
 

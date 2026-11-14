@@ -4,7 +4,13 @@ import { redirect } from "next/navigation"
 import { DemoNote } from "@/components/portal/demo-note"
 import { StatusBadge } from "@/components/secretary/status-badge"
 import { pacienteActual } from "@/lib/portal/sesion"
-import { coberturaDe, turnosDelPaciente } from "@/lib/secretary/demo-data"
+import {
+  cancelacionesCercanas,
+  facturacionDelPaciente,
+  pesos,
+  turnosDelPaciente,
+  vencimientoDe,
+} from "@/lib/secretary/demo-data"
 
 export const metadata: Metadata = {
   title: "Mi portal · Centro Médico Aurora",
@@ -21,13 +27,8 @@ export default async function PortalPage() {
   const hoy = new Date()
   const turnos = turnosDelPaciente(paciente.id, hoy)
   const proximo = turnos.find((turno) => !turno.fue) ?? null
-
-  const datos = [
-    { label: "Nombre", value: paciente.nombre },
-    { label: "Documento", value: paciente.documento },
-    { label: "Cobertura", value: coberturaDe(paciente) },
-    { label: "Email", value: paciente.email },
-  ]
+  const [mesAPagar] = facturacionDelPaciente(paciente.id, hoy)
+  const cancelaciones = cancelacionesCercanas(paciente.id, hoy)
 
   return (
     <>
@@ -38,27 +39,11 @@ export default async function PortalPage() {
         Hola, {paciente.nombre.split(" ")[0]}
       </h1>
       <p className="mt-1 max-w-[42rem] text-body-md leading-snug text-fg-secondary">
-        Acá vas a encontrar tus turnos, tus recetas y tu facturación.
+        Acá ves las novedades: tu próximo turno, lo que tenés que pagar y los
+        turnos que se cancelaron.
       </p>
 
-      <div className="mt-lg grid gap-md lg:grid-cols-[1fr_1.3fr]">
-        <section
-          aria-label="Tus datos"
-          className="rounded-xl border border-surface-subtle bg-card p-md shadow-card"
-        >
-          <h2 className="text-title-md font-semibold tracking-tight text-foreground">
-            Tus datos
-          </h2>
-          <dl className="mt-sm flex flex-col gap-2">
-            {datos.map((dato) => (
-              <div key={dato.label} className="flex flex-col">
-                <dt className="text-label-sm text-fg-secondary">{dato.label}</dt>
-                <dd className="text-body-md break-words text-foreground">{dato.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-
+      <div className="mt-lg flex flex-col gap-md">
         <section
           aria-label="Tu próximo turno"
           className="rounded-xl border border-surface-subtle bg-card p-md shadow-card"
@@ -93,6 +78,71 @@ export default async function PortalPage() {
             Ver todos tus turnos
           </Link>
         </section>
+
+        <section
+          aria-label="Cuota del mes"
+          className="rounded-xl border border-surface-subtle bg-card p-md shadow-card"
+        >
+          <h2 className="text-title-md font-semibold tracking-tight text-foreground">
+            Cuota del mes
+          </h2>
+          {mesAPagar ? (
+            <>
+              <p className="mt-sm text-body-md text-fg-secondary">
+                {mesAPagar.mes}
+              </p>
+              <p className="text-title-md font-semibold text-foreground">
+                {pesos(mesAPagar.aCargo)} a cargo
+              </p>
+              <p className="mt-2 text-body-sm text-fg-secondary">
+                Vence el {vencimientoDe(mesAPagar.clave)}
+              </p>
+            </>
+          ) : (
+            <p className="mt-sm text-body-md text-fg-secondary">
+              Todavía no tenés consumos para pagar: aparece acá después de tu
+              primera consulta.
+            </p>
+          )}
+          <Link
+            href="/portal/facturacion"
+            className="mt-sm inline-flex text-label-md text-primary underline-offset-4 hover:underline"
+          >
+            Ver el detalle
+          </Link>
+        </section>
+
+        {cancelaciones.length > 0 ? (
+          <section
+            aria-label="Turnos cancelados"
+            className="rounded-xl border border-surface-subtle bg-card p-md shadow-card"
+          >
+            <h2 className="text-title-md font-semibold tracking-tight text-foreground">
+              Turnos cancelados
+            </h2>
+            <ul className="mt-sm flex flex-col">
+              {cancelaciones.map((turno) => (
+                <li
+                  key={turno.id}
+                  className="flex flex-col border-b border-surface-subtle py-sm last:border-b-0"
+                >
+                  <span className="text-label-md text-foreground">
+                    {turno.cuando}
+                  </span>
+                  <span className="text-body-sm text-fg-secondary">
+                    {turno.profesional} · {turno.especialidad} · {turno.motivo}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/#reservar-turno"
+              className="mt-sm inline-flex text-label-md text-primary underline-offset-4 hover:underline"
+            >
+              Pedir un turno nuevo
+            </Link>
+          </section>
+        ) : null}
       </div>
 
       <DemoNote />

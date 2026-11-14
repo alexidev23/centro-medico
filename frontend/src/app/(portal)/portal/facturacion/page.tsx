@@ -17,12 +17,37 @@ export default async function FacturacionPage() {
 
   const facturacion = facturacionDelPaciente(paciente.id, new Date())
 
+  const datos = [
+    { label: "Nombre", value: paciente.nombre },
+    { label: "Documento", value: paciente.documento },
+    { label: "Cobertura", value: coberturaDe(paciente) },
+    { label: "Email", value: paciente.email },
+  ]
+
   return (
     <>
       <h1 className="text-headline-md font-bold tracking-tight text-foreground">
         Tu cuenta
       </h1>
-      <p className="mt-1 max-w-[42rem] text-body-md leading-snug text-fg-secondary">
+
+      <section
+        aria-label="Tus datos"
+        className="mt-md rounded-xl border border-surface-subtle bg-card p-md shadow-card"
+      >
+        <h2 className="text-title-md font-semibold tracking-tight text-foreground">
+          Tus datos
+        </h2>
+        <dl className="mt-sm flex flex-col gap-2">
+          {datos.map((dato) => (
+            <div key={dato.label} className="flex flex-col">
+              <dt className="text-label-sm text-fg-secondary">{dato.label}</dt>
+              <dd className="text-body-md break-words text-foreground">{dato.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <p className="mt-md max-w-[42rem] text-body-md leading-snug text-fg-secondary">
         Tu cobertura es{" "}
         <span className="font-semibold text-foreground">{coberturaDe(paciente)}</span>
         . Acá ves lo que dejó cada consulta atendida. Montos de demo: no son
