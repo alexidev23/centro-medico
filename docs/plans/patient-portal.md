@@ -356,4 +356,43 @@ validez médica.` The per-section note disappears because the page already carri
 - The tab bar lists `Inicio`, `Turnos` and `Recetas`, and marks the current one.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
 
+## Scope — PA-5d
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-5d | `frontend/src/app/(portal)/portal/facturacion/page.tsx` | **New**: the billing, moved out of the home |
+| PA-5d | `frontend/src/app/(portal)/portal/page.tsx` | Drops the billing section and its now-unused imports |
+| PA-5d | `frontend/src/components/portal/portal-nav.tsx` | Adds the `Cuenta` tab |
+
+## Specification — PA-5d
+
+**The billing gets its own address.** `/portal/facturacion` carries what the home used to show: per
+month, the month name and `N consultas`; one row per attended consultation (`cuando`,
+`profesional · especialidad · motivo`, `$ X a cargo` and `$ Y cubierto` only when Y > 0); the closing
+block with the month total and the coverage line. Amounts stay formatted on the server through
+`pesos()`; nothing moves to the client.
+
+**The page says where you are and what you are reading.** The heading is `Tu cuenta` and the opening
+sentence carries the coverage, with the demo warning once and `DemoNote` closing the page like every
+other tab.
+
+**No consultations, one sentence.** The empty case reads `Todavía no hay consultas para facturar: el
+resumen aparece acá después de la primera.`
+
+**The home stops billing.** The section and its imports leave; no total is printed twice. The new tab
+is the way in, so no extra link is needed. No download, print or pay control: there is no receipt
+behind them.
+
+## Acceptance criteria — PA-5d
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; `/portal/facturacion` is dynamic (ƒ).
+- Without a session, `/portal/facturacion` lands on `/portal/ingreso`.
+- As Ana Lucero: `Noviembre de 2026`, `2 consultas`, `$ 4.500 a cargo` and `$ 7.500 cubierto`,
+  `Total del mes: $ 9.000 a cargo` and `Cubierto por OSDE 210: $ 15.000`; the home no longer prints
+  `Total del mes`.
+- As Carla Domínguez: `Sin cobertura: el honorario completo queda a tu cargo.`
+- As Irene Salas: the empty sentence, no list.
+- The tab bar lists `Inicio`, `Turnos`, `Recetas` and `Cuenta`, and marks the current one.
+- No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
 
