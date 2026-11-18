@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { connection } from "next/server"
 import { DemoNote } from "@/components/portal/demo-note"
 import { pacienteActual } from "@/lib/portal/sesion"
 import { coberturaDe, facturacionDelPaciente, pesos } from "@/lib/secretary/demo-data"
@@ -14,6 +15,10 @@ export const instant = false
 export default async function FacturacionPage() {
   const paciente = await pacienteActual()
   if (!paciente) redirect("/portal/ingreso")
+
+  // `new Date()` is an unstable value: the docs require an explicit request
+  // boundary with cacheComponents, cookies() alone is not enough.
+  await connection()
 
   const facturacion = facturacionDelPaciente(paciente.id, new Date())
 

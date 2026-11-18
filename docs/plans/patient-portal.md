@@ -1,7 +1,7 @@
 # Stage PA — Patient portal
 
 **Branch:** `feat/patient-portal`
-**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped (`e4afe73`), PA-3 shipped (`e3636f2`), PA-4 split and shipped, PA-5a shipped
+**Status:** PA-1a shipped (`d9ca69e`), PA-1b shipped (`ced0ccc`), PA-2 shipped (`e4afe73`), PA-3 shipped (`e3636f2`), PA-4 split and shipped, PA-5a to PA-5e shipped (`a233c62`), PA-6 shipped (the request boundary)
 **Depends on:** `main` at `4d1bda4` (P8-iv)
 
 ## Objective
@@ -447,5 +447,44 @@ billing in `Cuenta`: `Tu cuenta` titles the page, the data follows, then the cov
 - `Ver el detalle` leads to `/portal/facturacion`; `Pedir un turno nuevo` leads to `/#reservar-turno`
   and lands on the home's booking section, not on a bounced `/reservar`.
 - No horizontal overflow at 320 / 390 / 768 / 1024 / 1280; console clean.
+
+## Scope — PA-6
+
+| Stage | File | Change |
+| --- | --- | --- |
+| PA-6 | `frontend/src/app/(portal)/portal/page.tsx` | `await connection()` before the first `new Date()` |
+| PA-6 | `frontend/src/app/(portal)/portal/turnos/page.tsx` | The same boundary |
+| PA-6 | `frontend/src/app/(portal)/portal/recetas/page.tsx` | The same boundary |
+| PA-6 | `frontend/src/app/(portal)/portal/facturacion/page.tsx` | The same boundary |
+
+## Specification — PA-6
+
+**`new Date()` is an unstable value and needs a request boundary.** With `cacheComponents: true` the dev
+server prerenders every route, dynamic ones included, and a bare `new Date()` inside a Server Component
+throws:
+
+```
+Error: Route "/portal": Next.js encountered the unstable value `new Date()` while prerendering.
+Ways to fix this:
+  - [dynamic] Render at request time by adding a dynamic data access (e.g. `await connection()`) before this call
+  - [cache] Prerender and cache the value with `"use cache"`
+```
+
+Reading the session cookie is not enough on its own. Each portal page awaits `connection()` after the
+guard and before the first `new Date()`, so the render waits for a real user request — which is what these
+pages already promise (`instant = false`, no static shell). That is also why the fix is `connection()` and
+not `io()`: `io()` exists to keep content prefetchable, and there is no shell here to prefetch.
+
+**The boundary is written per page, with its reason.** The comment above each `await` says why, so the
+next page that reads the clock copies the boundary instead of rediscovering the error through the overlay.
+
+## Acceptance criteria — PA-6
+
+- `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm build` exit 0; the four portal routes stay dynamic (ƒ).
+- `next dev` logs no `blocking-prerender-current-time` error for `/portal`, `/portal/turnos`,
+  `/portal/recetas` or `/portal/facturacion`. Removing the `await connection()` from `/portal` brings the
+  error back, which is what makes this stage a regression test rather than a guess.
+- With a session, all four pages still print their content: home `Cuota del mes`, turnos `Historial`,
+  recetas `Ibuprofeno`, cuenta `Total del mes`.
 
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { connection } from "next/server"
 import { DemoNote } from "@/components/portal/demo-note"
 import { StatusBadge } from "@/components/secretary/status-badge"
 import { pacienteActual } from "@/lib/portal/sesion"
@@ -42,6 +43,10 @@ function Lista({ turnos }: { turnos: TurnoDelPaciente[] }) {
 export default async function TurnosPage() {
   const paciente = await pacienteActual()
   if (!paciente) redirect("/portal/ingreso")
+
+  // `new Date()` is an unstable value: the docs require an explicit request
+  // boundary with cacheComponents, cookies() alone is not enough.
+  await connection()
 
   const turnos = turnosDelPaciente(paciente.id, new Date())
   const proximos = turnos.filter((turno) => !turno.fue)
